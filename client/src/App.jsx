@@ -4,11 +4,14 @@ import "./App.css";
 import Overview from "./pages/AdminDashBoard/Overview/Overview";
 import { ToastContainer } from "react-toastify";
 
+import StudentDashboard from "./pages/StudentDashboard/Main/StudentDashboard";
+
 function App() {
   return (
     <div>
       <Routes>
         <Route path="/admin-dashboard" element={<Overview />} />
+        <Route path="/student-dashboard" element={<StudentDashboard />} />
       </Routes>
       <ToastContainer />
     </div>
