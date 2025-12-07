@@ -1,0 +1,68 @@
+.summary-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.summary-value {
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.card-box {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.card-header-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.role-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.role-mentor {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.role-student {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-active {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-inactive {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* mobile tweak */
+@media (max-width: 576px) {
+  .summary-card {
+    padding: 14px;
+  }
+
+  .summary-value {
+    font-size: 24px;
+  }
+}
