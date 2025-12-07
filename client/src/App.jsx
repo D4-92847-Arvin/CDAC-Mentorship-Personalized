@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
-import Overview from "./pages/AdminDashBoard/Overview";
+
+import Overview from "./pages/AdminDashBoard/Overview/Overview";
 import { ToastContainer } from "react-toastify";
 
 function App() {
