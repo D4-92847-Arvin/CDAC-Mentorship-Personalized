@@ -15,14 +15,14 @@ const questions = [
   // Add more questions as needed
 ];
 
-const MCQPractice = () => {
+const MCQPractice = ({ onBackToDashboard }) => {
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState(null);
 
   return (
     <div className="mcq-practice-page">
       <div className="mcq-header-row">
-        <a href="#" className="back-link">&larr; Back to Dashboard</a>
+        <button className="back-link" onClick={onBackToDashboard}>&larr; Back to Dashboard</button>
         <div className="timer">⏲️ 10:00</div>
       </div>
       <div className="mcq-card">

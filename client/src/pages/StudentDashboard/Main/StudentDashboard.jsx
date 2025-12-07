@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./StudentDashboard.css";
 import MyMentor from "../MyMentor/MyMentor";
 import MySessions from "../MySessions/MySessions";
@@ -17,6 +18,11 @@ const sidebarItems = [
 
 const StudentDashboard = () => {
   const [activeTab, setActiveTab] = useState("Dashboard");
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    navigate("/");
+  };
 
   return (
     <div className="student-dashboard">
@@ -51,7 +57,7 @@ const StudentDashboard = () => {
         </nav>
         {/* Logout button */}
         <div className="sidebar-logout">
-          <button className="btn btn-light w-100">Logout</button>
+          <button className="btn btn-light w-100" onClick={handleLogout}>Logout</button>
         </div>
       </aside>
       <main className="dashboard-content">
@@ -145,8 +151,8 @@ const StudentDashboard = () => {
         )}
         {activeTab === "My Mentor" && <MyMentor />}
         {activeTab === "My Sessions" && <MySessions />}
-        {activeTab === "MCQ Practice" && <MCQPractice />}
-        {activeTab === "Subscriptions" && <Subscriptions />}
+        {activeTab === "MCQ Practice" && <MCQPractice onBackToDashboard={() => setActiveTab("Dashboard")} />}
+        {activeTab === "Subscriptions" && <Subscriptions onBackToDashboard={() => setActiveTab("Dashboard")} />}
         {activeTab === "Feedback" && <Feedback />}
       </main>
     </div>

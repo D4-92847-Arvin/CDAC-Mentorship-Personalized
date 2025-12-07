@@ -9,7 +9,7 @@ const Login = () => {
   const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
   const onLogin = () => {
-    if (role === "student") navigate("/student/dashboard");
+    if (role === "student") navigate("/student-dashboard");
     if (role === "mentor") navigate("/mentor/dashboard");
     if (role === "admin") navigate("/admin-dashboard");
   };
