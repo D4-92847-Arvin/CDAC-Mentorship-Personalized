@@ -4,6 +4,7 @@ import Login from "./pages/Login/Login";
 import Overview from "./pages/AdminDashBoard/Overview/Overview";
 import MentorRegister from "./pages/Register/MentorRegister";
 import StudentRegister from "./pages/Register/StudentRegister";
+import MentorListing from "./pages/MentorListing/MentorListing";
 import Home from "./pages/Home/Home";
 import { ToastContainer } from "react-toastify";
 
@@ -14,7 +15,8 @@ function App() {
     <div>
       <Routes>
         <Route path="/" element={<Home />} />
-         <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/mentors" element={<MentorListing />} />
 
         <Route path="/admin-dashboard" element={<Overview />} />
         <Route path="/student-dashboard" element={<StudentDashboard />} />
