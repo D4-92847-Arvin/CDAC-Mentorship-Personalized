@@ -1,0 +1,115 @@
+.login-page {
+  min-height: 100vh;
+  background: #f4f5fb;
+  padding: 40px 16px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 480px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 40px 32px 32px;
+}
+
+.login-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.login-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 24px;
+  background: #143f8f;
+  font-size: 36px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.25;
+  margin-bottom: 8px;
+}
+
+.login-subtitle {
+  font-size: 15px;
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+
+/* Role Toggle Pills */
+.login-role-toggle {
+  background: #e5e7eb;
+  border-radius: 999px;
+  padding: 4px;
+}
+
+.login-role-pill {
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  padding: 8px 0;
+}
+
+.login-role-pill.active {
+  background: #ffffff;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12);
+  color: #111827;
+}
+
+/* Inputs */
+.login-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.login-input {
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  padding: 10px 12px;
+}
+
+.login-primary-btn {
+  background-color: #143f8f;
+  border-radius: 999px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.login-demo-btn {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+}
+
+.login-footer {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.login-link-primary {
+  color: #143f8f;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.login-link-mentor {
+  color: #059669;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.login-back-link {
+  cursor: pointer;
+  text-decoration: underline;
+}
