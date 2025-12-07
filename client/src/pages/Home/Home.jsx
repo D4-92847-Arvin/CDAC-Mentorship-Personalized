@@ -1,13 +1,13 @@
 // src/pages/Home/Home.jsx
 import React from "react";
 import "./Home.css";
-// import Navbar from "../../components/Navbar/Navbar";
+import Navbar from "../../Component/Navbar/Navbar";
 import { Link } from "react-router-dom";
 
 const Home = () => {
   return (
     <div className="home-root">
-      {/* <Navbar /> */}
+      <Navbar />
 
       {/* Hero Section */}
       <section className="hero-section">
