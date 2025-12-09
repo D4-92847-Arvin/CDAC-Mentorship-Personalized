@@ -39,9 +39,9 @@ const Overview = () => {
         bg: "#17a2b8",
       },
       {
-        icon: "$",
+        icon: "₹",
         title: "Revenue milestone reached",
-        subtitle: "$40K monthly revenue",
+        subtitle: "₹40K monthly revenue",
         time: "1d ago",
         bg: "#fd7e14",
       },
