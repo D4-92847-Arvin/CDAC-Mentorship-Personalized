@@ -56,36 +56,66 @@ const plans = [
   },
 ];
 
-const Subscriptions = () => {
+const Subscriptions = ({ onBackToDashboard }) => {
   const [billing, setBilling] = useState("monthly");
+  const [selectedPlan, setSelectedPlan] = useState("Monthly Plan");
   return (
     <div className="subs-page">
-      <a href="#" className="subs-back">&larr; Back to Dashboard</a>
+      <button className="subs-back" onClick={onBackToDashboard}>&larr; Back to Dashboard</button>
       <h2 className="subs-title">Choose Your Plan</h2>
       <div className="subs-subtitle">Invest in your future with personalized mentorship</div>
       <div className="subs-billing-toggle">
-        <span className={billing === "monthly" ? "active" : ""} onClick={() => setBilling("monthly")}>Monthly</span>
+        <span className={billing === "monthly" ? "active" : ""} onClick={() => {
+          setBilling("monthly");
+          setSelectedPlan("Monthly Plan");
+        }}>Monthly</span>
         <span className="toggle-switch">
-          <input type="checkbox" id="billing-toggle" checked={billing === "annual"} onChange={() => setBilling(billing === "monthly" ? "annual" : "monthly")} />
+          <input type="checkbox" id="billing-toggle" checked={billing === "annual"} onChange={() => {
+            const newBilling = billing === "monthly" ? "annual" : "monthly";
+            setBilling(newBilling);
+            setSelectedPlan(newBilling === "annual" ? "Annual Plan" : "Monthly Plan");
+          }} />
           <label htmlFor="billing-toggle"></label>
         </span>
-        <span className={billing === "annual" ? "active" : ""} onClick={() => setBilling("annual")}>Annual <span className="save-badge">Save 20%</span></span>
+        <span className={billing === "annual" ? "active" : ""} onClick={() => {
+          setBilling("annual");
+          setSelectedPlan("Annual Plan");
+        }}>Annual <span className="save-badge">Save 20%</span></span>
       </div>
       <div className="subs-plans-row">
-        {plans.map((plan, idx) => (
-          <div key={plan.name} className={"subs-plan-card" + (plan.highlight ? " highlight" : "") + (billing === "annual" && plan.name === "Annual Plan" ? " highlight" : "") }>
-            <div className="subs-plan-icon">{plan.icon}</div>
-            {plan.tag && <div className="subs-plan-tag">{plan.tag}</div>}
-            <div className="subs-plan-name">{plan.name}</div>
-            <div className="subs-plan-price">${plan.price}<span className="subs-plan-period">{plan.period}</span></div>
-            <ul className="subs-plan-features">
-              {plan.features.map((f, i) => (
-                <li key={i}><span className="check">✔</span> {f}</li>
-              ))}
-            </ul>
-            <button className={"subs-plan-btn" + (plan.highlight || (billing === "annual" && plan.name === "Annual Plan") ? " primary" : "")}>{plan.button}</button>
-          </div>
-        ))}
+        {plans.map((plan, idx) => {
+          const isSelected = (billing === "annual" && plan.name === "Annual Plan") || (billing === "monthly" && plan.name === "Monthly Plan");
+          return (
+            <div
+              key={plan.name}
+              className={"subs-plan-card" + (isSelected ? " highlight" : "")}
+            >
+              <div className="subs-plan-icon">{plan.icon}</div>
+              {plan.tag && <div className="subs-plan-tag">{plan.tag}</div>}
+              <div className="subs-plan-name">{plan.name}</div>
+              <div className="subs-plan-price">${plan.price}<span className="subs-plan-period">{plan.period}</span></div>
+              <ul className="subs-plan-features">
+                {plan.features.map((f, i) => (
+                  <li key={i}><span className="check">✔</span> {f}</li>
+                ))}
+              </ul>
+              <button
+                className={"subs-plan-btn" + (isSelected ? " primary" : "")}
+                onClick={() => {
+                  if (plan.name === "Annual Plan") {
+                    setBilling("annual");
+                    setSelectedPlan("Annual Plan");
+                  } else if (plan.name === "Monthly Plan") {
+                    setBilling("monthly");
+                    setSelectedPlan("Monthly Plan");
+                  }
+                }}
+              >
+                {plan.button}
+              </button>
+            </div>
+          );
+        })}
       </div>
       <div className="subs-includes-row">
         <div className="subs-includes-card">
