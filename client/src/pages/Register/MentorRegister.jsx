@@ -313,7 +313,7 @@ const MentorRegister = () => {
 
           <p className="text-center mt-3 mb-0 small-text">
             Already have an account?{" "}
-            <Link to="/" className="link-inline">
+            <Link to="/login" className="link-inline">
               Sign In
             </Link>
           </p>
