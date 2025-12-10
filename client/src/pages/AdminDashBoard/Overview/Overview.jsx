@@ -6,6 +6,8 @@ import OverviewContent from "../OverviewContent/OverviewContent";
 import VerificationContent from "../Verification/VerificationContent";
 import UserManagementContent from "../UserManagement/UserManagementContent";
 import RevenueContent from "../Revenue/RevenueContent";
+import PerformanceLeaderboards from "../PerformanceLeaderBoard/PerformanceLeaderBoard";
+import RetentionChurn from "../RetentionChurn/RetentionChurn";
 
 const Overview = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -61,6 +63,10 @@ const Overview = () => {
         return <UserManagementContent />;
       case "revenue":
         return <RevenueContent />;
+      case "leaderboards":
+        return <PerformanceLeaderboards />;
+      case "retention":
+        return <RetentionChurn />;
       default:
         return (
           <OverviewContent chartData={chartData} activities={activities} />
