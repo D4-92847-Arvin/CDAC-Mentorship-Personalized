@@ -42,6 +42,18 @@ const Sidebar = ({ activeTab, onTabChange }) => {
           isActive={activeTab === "revenue"}
           onClick={() => onTabChange("revenue")}
         />
+        <SidebarItem
+          label="Leaderboards"
+          icon="🏆"
+          isActive={activeTab === "leaderboards"}
+          onClick={() => onTabChange("leaderboards")}
+        />
+        <SidebarItem
+          label="Retention & Churn"
+          icon="📊"
+          isActive={activeTab === "retention"}
+          onClick={() => onTabChange("retention")}
+        />
       </nav>
 
       <div className="sidebar-logout mt-auto d-none d-lg-block">
