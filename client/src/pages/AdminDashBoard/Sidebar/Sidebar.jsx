@@ -1,7 +1,12 @@
 import React from "react";
 import "./Sidebar.css";
+import { useNavigate } from "react-router-dom";
 
 const Sidebar = ({ activeTab, onTabChange }) => {
+  const navigation = useNavigate();
+  const onLogout = () => {
+    navigation("/");
+  };
   return (
     <div className="sidebar d-flex flex-column h-100">
       {/* Logo */}
@@ -57,7 +62,9 @@ const Sidebar = ({ activeTab, onTabChange }) => {
       </nav>
 
       <div className="sidebar-logout mt-auto d-none d-lg-block">
-        <button className="btn btn-light w-100">Logout</button>
+        <button className="btn btn-light w-100" onClick={onLogout}>
+          Logout
+        </button>
       </div>
     </div>
   );
