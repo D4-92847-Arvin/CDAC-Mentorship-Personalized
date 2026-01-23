@@ -47,12 +47,12 @@
 /* Role Toggle Pills */
 .login-role-toggle {
   background: #e5e7eb;
-  border-radius: 999px;
+  border-radius: 25px;
   padding: 4px;
 }
 
 .login-role-pill {
-  border-radius: 999px;
+  border-radius: 25px;
   border: none;
   background: transparent;
   font-size: 14px;
@@ -65,6 +65,7 @@
   background: #ffffff;
   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12);
   color: #111827;
+  border-radius: 25px;
 }
 
 /* Inputs */

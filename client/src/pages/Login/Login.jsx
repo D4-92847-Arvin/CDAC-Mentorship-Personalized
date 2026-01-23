@@ -9,25 +9,21 @@ const Login = () => {
   const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
   const onLogin = () => {
-  // Save logged-in user role (temporary login system)
-  localStorage.setItem("userRole", role);
-  localStorage.setItem("user", "demo-user"); // mark as logged in
+    // Save logged-in user role (temporary login system)
+    localStorage.setItem("userRole", role);
+    localStorage.setItem("user", "demo-user"); // mark as logged in
 
-  if (role === "student") navigate("/student-dashboard");
-  if (role === "mentor") navigate("/mentor/dashboard");
-  if (role === "admin") navigate("/admin-dashboard");
-};
-
+    if (role === "student") navigate("/student-dashboard");
+    if (role === "mentor") navigate("/mentor/dashboard");
+    if (role === "admin") navigate("/admin-dashboard");
+  };
 
   return (
     <div className="login-page d-flex align-items-center justify-content-center">
       <div className="login-card shadow-lg">
-
         {/* Icon */}
         <div className="login-icon-wrapper">
-          <div className="login-icon">
-            🎓
-          </div>
+          <div className="login-icon">🎓</div>
         </div>
 
         {/* Title */}
@@ -39,7 +35,7 @@ const Login = () => {
         </p>
 
         {/* Role Buttons */}
-        <div className="login-role-toggle d-flex mb-4">
+        <div className="login-role-toggle d-flex mb-4 ">
           {["student", "mentor", "admin"].map((r) => (
             <button
               key={r}
@@ -86,12 +82,19 @@ const Login = () => {
         <div className="login-footer text-center mt-4">
           <p>
             Don't have an account?
-            <span className="login-link-primary"><a href="/register/student">Sign up as Student</a></span> or
+            <span className="login-link-primary">
+              <a href="/register/student">Sign up as Student</a>
+            </span>{" "}
+            or
           </p>
-          <span className="login-link-mentor"><a href="/register/mentor">Apply as Mentor</a> </span>
+          <span className="login-link-mentor">
+            <a href="/register/mentor">Apply as Mentor</a>{" "}
+          </span>
 
           <div className="mt-3">
-            <span className="login-back-link"><a href="/">← Back to Home</a></span>
+            <span className="login-back-link">
+              <a href="/">← Back to Home</a>
+            </span>
           </div>
         </div>
       </div>
