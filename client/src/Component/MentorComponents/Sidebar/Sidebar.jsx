@@ -59,7 +59,7 @@ function Sidebar() {
         </NavLink>
       </nav>
       
-      <button className="logout-btn">Logout</button>
+      <button className="logout-btn"><a href="/">Logout</a></button>
     </aside>
   )
 }

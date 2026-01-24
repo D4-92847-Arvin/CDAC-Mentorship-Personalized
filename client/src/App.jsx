@@ -6,6 +6,7 @@ import MentorRegister from "./pages/Register/MentorRegister";
 import StudentRegister from "./pages/Register/StudentRegister";
 import MentorListing from "./pages/MentorListing/MentorListing";
 import Home from "./pages/Home/Home";
+import Pricing from "./pages/PricingPage/Pricing";
 import { ToastContainer } from "react-toastify";
 import Dashboard from "./pages/MentorDashBoard/Dashboard/Dashboard";
 import StudentDashboard from "./pages/StudentDashboard/Main/StudentDashboard";
@@ -17,6 +18,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/mentors" element={<MentorListing />} />
+        <Route path="/pricing" element={<Pricing />} />
 
         <Route path="/admin-dashboard" element={<Overview />} />
         <Route path="/student-dashboard" element={<StudentDashboard />} />

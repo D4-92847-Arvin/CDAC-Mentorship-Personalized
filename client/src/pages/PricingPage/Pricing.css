@@ -1,0 +1,199 @@
+.pricing-root {
+  background: #f5f7fb;
+  min-height: 100vh;
+}
+
+.pricing-section {
+  padding: 40px 0 60px;
+}
+
+.pricing-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.pricing-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 6px;
+}
+
+/* Toggle */
+.billing-toggle-wrapper {
+  margin-top: 20px;
+  display: inline-flex;
+  align-items: center;
+  background: #e5e7eb;
+  border-radius: 999px;
+  padding: 4px;
+  position: relative;
+}
+
+.billing-toggle-btn {
+  border: none;
+  background: transparent;
+  padding: 6px 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.billing-toggle-btn.active {
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.16);
+}
+
+.save-badge {
+  margin-left: 10px;
+  background: #22c55e;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+/* Plan cards */
+.plan-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 22px 20px 20px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+  text-align: left;
+  height: 100%;
+  position: relative;
+}
+
+.plan-card-featured {
+  border: 2px solid #143f8f;
+}
+
+.plan-badge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #143f8f;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+
+.plan-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.plan-name {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.plan-price {
+  font-size: 24px;
+  font-weight: 700;
+  color: #143f8f;
+  margin-bottom: 10px;
+}
+
+.plan-price-sub {
+  font-size: 13px;
+  color: #6b7280;
+  margin-left: 4px;
+}
+
+.plan-features {
+  list-style: none;
+  padding-left: 0;
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.plan-features li::before {
+  content: "✔";
+  color: #16a34a;
+  margin-right: 6px;
+}
+
+/* Buttons */
+.plan-btn-primary {
+  background: #f97316;
+  border-color: #f97316;
+  border-radius: 999px;
+  font-weight: 600;
+  width: 100%;
+}
+
+.plan-btn-primary:hover {
+  background: #ea580c;
+  border-color: #ea580c;
+}
+
+.plan-btn-outline {
+  background: transparent;
+  color: #143f8f;
+  border-radius: 999px;
+  border: 1px solid #143f8f;
+  font-weight: 600;
+  width: 100%;
+}
+
+.plan-btn-outline:hover {
+  background: #143f8f;
+  color: #ffffff;
+}
+
+/* Bottom feature strip */
+.feature-strip-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 14px 18px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.feature-strip-icon {
+  font-size: 20px;
+  color: #16a34a;
+  margin-bottom: 4px;
+}
+
+.feature-strip-card h6 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.feature-strip-card p {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pricing-section {
+    padding-top: 30px;
+  }
+
+  .pricing-title {
+    font-size: 24px;
+  }
+
+  .plan-card {
+    text-align: left;
+  }
+
+  .billing-toggle-wrapper {
+    width: auto;
+  }
+}

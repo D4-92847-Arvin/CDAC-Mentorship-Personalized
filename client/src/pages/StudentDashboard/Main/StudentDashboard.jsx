@@ -51,7 +51,7 @@ const StudentDashboard = () => {
         </nav>
         {/* Logout button */}
         <div className="sidebar-logout">
-          <button className="btn btn-light w-100">Logout</button>
+          <button className="btn btn-light w-100"><a href="/">Logout</a></button>
         </div>
       </aside>
       <main className="dashboard-content">

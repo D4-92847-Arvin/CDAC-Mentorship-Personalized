@@ -45,7 +45,7 @@ const Sidebar = ({ activeTab, onTabChange }) => {
       </nav>
 
       <div className="sidebar-logout mt-auto d-none d-lg-block">
-        <button className="btn btn-light w-100">Logout</button>
+        <button className="btn btn-light w-100"><a href="/">Logout</a></button>
       </div>
     </div>
   );

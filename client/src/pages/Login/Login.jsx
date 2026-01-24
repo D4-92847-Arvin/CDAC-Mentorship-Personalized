@@ -78,15 +78,12 @@ const Login = () => {
           Sign In as {capitalize(role)}
         </button>
 
-        <button className="btn w-100 login-demo-btn">
-          Try Demo ({capitalize(role)})
-        </button>
 
         {/* Footer */}
         <div className="login-footer text-center mt-4">
           <p>
             Don't have an account?
-            <span className="login-link-primary"><a href="/register/student">Sign up as Student</a></span> or
+            <span className="login-link-primary"><a href="/register/student"> Sign up as Student </a></span>  or
           </p>
           <span className="login-link-mentor"><a href="/register/mentor">Apply as Mentor</a> </span>
 

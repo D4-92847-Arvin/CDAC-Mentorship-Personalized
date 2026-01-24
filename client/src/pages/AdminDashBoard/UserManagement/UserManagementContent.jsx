@@ -70,7 +70,7 @@ const UserManagementContent = () => {
       <div className="card-box">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h5 className="card-header-title mb-0">All Users</h5>
-          <button className="btn btn-primary">Add User</button>
+          {/* <button className="btn btn-primary">Add User</button> */}
         </div>
 
         <div className="table-responsive">
