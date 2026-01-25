@@ -10,7 +10,7 @@ const Login = () => {
 
   const onLogin = () => {
     if (role === "student") navigate("/student-dashboard");
-    if (role === "mentor") navigate("/mentor");
+    if (role === "mentor") navigate("/mentor/dashboard");
     if (role === "admin") navigate("/admin-dashboard");
   };
 
