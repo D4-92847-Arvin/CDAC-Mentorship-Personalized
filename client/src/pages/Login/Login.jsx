@@ -81,12 +81,12 @@ const Login = () => {
         <div className="login-footer text-center mt-4">
           <p>
             Don't have an account?
-            <span className="login-link-primary"> Sign up as Student</span> or
+            <span className="login-link-primary"><a href="/register/student">Sign up as Student</a></span> or
           </p>
-          <span className="login-link-mentor"> Apply as Mentor</span>
+          <span className="login-link-mentor"><a href="/register/mentor">Apply as Mentor</a> </span>
 
           <div className="mt-3">
-            <span className="login-back-link">← Back to Home</span>
+            <span className="login-back-link"><a href="/">← Back to Home</a></span>
           </div>
         </div>
       </div>

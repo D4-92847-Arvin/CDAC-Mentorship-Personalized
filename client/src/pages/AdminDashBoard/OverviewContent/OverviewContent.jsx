@@ -68,7 +68,7 @@ const OverviewContent = ({ chartData, activities }) => {
             <div className="d-flex justify-content-between align-items-start">
               <div>
                 <div className="text-muted small mb-1">Monthly Revenue</div>
-                <h3 className="metric-value">$42.5K</h3>
+                <h3 className="metric-value">₹42.5K</h3>
                 <span className="badge-pill badge-success">📈 +23%</span>
               </div>
               <div className="metric-icon bg-revenue">

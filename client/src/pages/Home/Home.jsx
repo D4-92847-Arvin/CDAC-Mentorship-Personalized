@@ -25,7 +25,7 @@ const Home = () => {
               </p>
 
               <div className="d-flex flex-wrap gap-3">
-                <Link to="/register/student" className="btn hero-cta-primary">
+                <Link to="/mentors" className="btn hero-cta-primary">
                   Find a Mentor
                 </Link>
                 <Link to="/register/mentor" className="btn hero-cta-secondary">

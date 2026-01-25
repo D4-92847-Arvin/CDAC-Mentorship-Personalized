@@ -1,0 +1,179 @@
+.mentor-page-root {
+  background: #f9fafb;
+  min-height: 100vh;
+}
+
+.mentor-listing-section {
+  padding: 32px 0 48px;
+}
+
+.mentor-heading {
+  font-size: 26px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.mentor-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* Search & filters */
+.mentor-filters {
+  margin-top: 12px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 999px;
+  padding-left: 14px;
+  border: 1px solid #e5e7eb;
+}
+
+.search-icon {
+  font-size: 16px;
+  margin-right: 6px;
+}
+
+.search-input {
+  border: none;
+  box-shadow: none;
+  border-radius: 999px;
+}
+
+.search-input:focus {
+  box-shadow: none;
+}
+
+.filter-btn {
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  font-size: 13px;
+  padding: 6px 14px;
+}
+
+.filter-label {
+  font-weight: 500;
+}
+
+.showing-text {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 10px;
+}
+
+/* Mentor cards */
+.mentor-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 16px 16px 14px;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.mentor-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.mentor-name {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.mentor-subject {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.mentor-rating {
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.star {
+  color: #f59e0b;
+  margin-right: 2px;
+}
+
+.rating-score {
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.rating-details {
+  color: #6b7280;
+}
+
+.badge-verified {
+  align-self: flex-start;
+  background: #ecfdf5;
+  color: #047857;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 999px;
+}
+
+.mentor-desc {
+  font-size: 13px;
+  color: #4b5563;
+  margin-top: 8px;
+}
+
+.mentor-tags {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mentor-tag {
+  background: #f3f4f6;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #374151;
+}
+
+/* Price & button */
+.mentor-price {
+  font-weight: 700;
+  font-size: 14px;
+  color: #111827;
+}
+
+.mentor-book-btn {
+  background: #f97316;
+  border-color: #f97316;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.mentor-book-btn:hover {
+  background: #ea580c;
+  border-color: #ea580c;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .mentor-heading {
+    font-size: 22px;
+  }
+
+  .mentor-card {
+    padding: 14px;
+  }
+}

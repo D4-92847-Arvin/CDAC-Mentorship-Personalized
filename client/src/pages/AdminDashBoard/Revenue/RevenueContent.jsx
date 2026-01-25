@@ -22,21 +22,21 @@ const RevenueContent = () => {
         <div className="col-12 col-md-3">
           <div className="revenue-card h-100">
             <div className="revenue-stat-title">Total Revenue</div>
-            <div className="revenue-stat-value">$216.5K</div>
+            <div className="revenue-stat-value">₹216.5K</div>
             <span className="revenue-growth">+23%</span>
           </div>
         </div>
         <div className="col-12 col-md-3">
           <div className="revenue-card h-100">
             <div className="revenue-stat-title">This Month</div>
-            <div className="revenue-stat-value">$42.5K</div>
+            <div className="revenue-stat-value">₹42.5K</div>
             <span className="revenue-growth">+6%</span>
           </div>
         </div>
         <div className="col-12 col-md-3">
           <div className="revenue-card h-100">
             <div className="revenue-stat-title">Avg. Transaction</div>
-            <div className="revenue-stat-value">$200</div>
+            <div className="revenue-stat-value">₹200</div>
           </div>
         </div>
         <div className="col-12 col-md-3">
@@ -65,10 +65,10 @@ const RevenueContent = () => {
                 <tr key={index}>
                   <td className="fw-semibold">{item.month}</td>
                   <td className="text-teal fw-semibold">
-                    ${item.revenue.toLocaleString()}
+                    ₹{item.revenue.toLocaleString()}
                   </td>
                   <td>{item.transactions}</td>
-                  <td>${Math.round(item.revenue / item.transactions)}</td>
+                  <td>₹{Math.round(item.revenue / item.transactions)}</td>
                 </tr>
               ))}
             </tbody>
