@@ -1,0 +1,58 @@
+package com.mentorship.entities;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import jakarta.persistence.ForeignKey;
+
+
+@Entity
+@Table(name = "mentors")
+@NoArgsConstructor
+@Getter
+@Setter
+@ToString(callSuper=true, exclude= {"userDetails"})
+public class Mentor extends BaseEntity{
+	
+	@Id //PK constraint
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long mentorId;
+	
+	@OneToOne(optional = false,cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id",nullable = false,unique = true,
+            foreignKey = @ForeignKey(name = "fk_mentor_user"))
+	private User userDetails;
+	
+	@Column(name="specialization",length = 100)
+	private String specialization;
+	
+	@Column(name="experience",length = 300)
+	private String experience;
+	
+	@Column(name="rate_per_session")
+	private double ratePerSession;
+	
+	@Column(name="discount_percent")
+	private double discountPercent;
+	
+	@Column(name="verification_status",length = 20)
+	private VerificationStatus verificationStatus;
+	
+	
+	@ManyToOne(fetch = FetchType.LAZY) 
+	@JoinColumn( name = "verified_by", foreignKey = @ForeignKey(name ="fk_mentor_verified_by")) 
+	private User verifiedBy;
+	 
+}
