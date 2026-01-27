@@ -3,6 +3,8 @@ package com.mentorship.entities;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -47,6 +49,7 @@ public class Mentor extends BaseEntity{
 	@Column(name="discount_percent")
 	private double discountPercent;
 	
+	@Enumerated(EnumType.STRING)
 	@Column(name="verification_status",length = 20)
 	private VerificationStatus verificationStatus;
 	
