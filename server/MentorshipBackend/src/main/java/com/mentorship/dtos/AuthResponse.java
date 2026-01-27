@@ -4,15 +4,14 @@ import java.time.LocalDate;
 
 import com.mentorship.entities.UserRole;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@AllArgsConstructor
 public class AuthResponse {
-	private String firstName;
-	private String lastName;
-	private String email;
-	private LocalDate dob;
-	private UserRole userRole;
+	private String message;
+	private String jwt;
 }
