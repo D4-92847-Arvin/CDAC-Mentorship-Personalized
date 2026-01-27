@@ -1,0 +1,18 @@
+package com.mentorship.dtos;
+
+import java.time.LocalDate;
+
+import com.mentorship.entities.UserRole;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class AuthResponse {
+	private String firstName;
+	private String lastName;
+	private String email;
+	private LocalDate dob;
+	private UserRole userRole;
+}
