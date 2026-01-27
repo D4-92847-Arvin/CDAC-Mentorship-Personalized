@@ -9,6 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+
 public class UserResp {
 	private Long id;
 	private String firstName;	

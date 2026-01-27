@@ -13,11 +13,14 @@ import com.mentorship.dtos.UserResp;
 import com.mentorship.entities.User;
 import com.mentorship.service.UserService;
 
+import lombok.AllArgsConstructor;
+
 @RestController
 @RequestMapping("/users")
+@AllArgsConstructor
 public class UserController {
 	
-	@Autowired
+	
 	private UserService userService;
 	
 	@GetMapping
