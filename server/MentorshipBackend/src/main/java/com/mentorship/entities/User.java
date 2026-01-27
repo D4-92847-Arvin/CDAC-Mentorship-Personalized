@@ -2,6 +2,8 @@ package com.mentorship.entities;
 
 import java.time.LocalDate;
 
+import org.springframework.security.core.userdetails.UserDetails;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
