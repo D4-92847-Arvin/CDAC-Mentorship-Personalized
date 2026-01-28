@@ -1,44 +1,90 @@
 import React, { useState } from "react";
 import "./Registration.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { registerStudent } from "../../API/authService";
 
 const StudentRegister = () => {
   const [form, setForm] = useState({
-    fullName: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
-    grade: "",
-    goals: "",
-    agree: false,
+    dob: "",
+    address: "",
+    phoneNo: "",
+    targetDomain: "",
+    qualification: "",
   });
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value,
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // static page – no backend, just mock
-    console.log("Student registration data:", form);
-    alert("Student account created (mock)!");
+    setError("");
+    setLoading(true);
+
+    try {
+      // Validate required fields
+      if (!form.firstName || !form.email || !form.password) {
+        setError("Please fill in all required fields");
+        setLoading(false);
+        return;
+      }
+
+      // Validate passwords match
+      if (form.password !== form.confirmPassword) {
+        setError("Passwords do not match");
+        setLoading(false);
+        return;
+      }
+
+      // Call backend signup
+      const signupData = {
+        firstName: form.firstName,
+        lastName: form.lastName || "",
+        email: form.email,
+        password: form.password,
+        dob: form.dob || null,
+        address: form.address || "",
+        phoneNo: form.phoneNo || "",
+        targetDomain: form.targetDomain || "",
+        qualification: form.qualification || "",
+      };
+
+      await registerStudent(signupData);
+      
+      alert("Student account created successfully! Please log in.");
+      navigate("/login");
+    } catch (err) {
+      console.error("Registration error:", err);
+      setError(err.message || "Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const subjects = [
-    "Mathematics",
-    "Chemistry",
-    "History",
-    "Engineering",
-    "Computer Science",
-    "Biology",
-    "Economics",
-    "Physics",
-    "English",
-    "Business Studies",
+  const domains = [
+    "Web Development",
+    "Mobile Development",
+    "Data Science",
+    "Machine Learning",
+    "Cloud Computing",
+    "DevOps",
+    "Cybersecurity",
+    "UI/UX Design",
+    "Business Analysis",
+    "Other",
   ];
 
   return (
@@ -54,17 +100,35 @@ const StudentRegister = () => {
         </p>
 
         <form onSubmit={handleSubmit}>
+          {error && (
+            <div className="alert alert-danger" role="alert">
+              {error}
+            </div>
+          )}
+
           {/* Personal Information */}
           <h5 className="section-title mt-4">Personal Information</h5>
           <div className="row g-3 mt-1">
             <div className="col-md-6">
-              <label className="form-label">Full Name *</label>
+              <label className="form-label">First Name *</label>
               <input
-                name="fullName"
+                name="firstName"
                 type="text"
                 className="form-control register-input"
-                placeholder="Arjun Verma"
-                value={form.fullName}
+                placeholder="John"
+                value={form.firstName}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label">Last Name</label>
+              <input
+                name="lastName"
+                type="text"
+                className="form-control register-input"
+                placeholder="Doe"
+                value={form.lastName}
                 onChange={handleChange}
               />
             </div>
@@ -74,8 +138,41 @@ const StudentRegister = () => {
                 name="email"
                 type="email"
                 className="form-control register-input"
-                placeholder="arjun@example.com"
+                placeholder="john@example.com"
                 value={form.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label">Date of Birth</label>
+              <input
+                name="dob"
+                type="date"
+                className="form-control register-input"
+                value={form.dob}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label">Phone Number</label>
+              <input
+                name="phoneNo"
+                type="tel"
+                className="form-control register-input"
+                placeholder="+91 98765 43210"
+                value={form.phoneNo}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label">Address</label>
+              <input
+                name="address"
+                type="text"
+                className="form-control register-input"
+                placeholder="Your address"
+                value={form.address}
                 onChange={handleChange}
               />
             </div>
@@ -85,9 +182,10 @@ const StudentRegister = () => {
                 name="password"
                 type="password"
                 className="form-control register-input"
-                placeholder="At least 8 characters"
+                placeholder="At least 6 characters"
                 value={form.password}
                 onChange={handleChange}
+                required
               />
             </div>
             <div className="col-md-6">
@@ -99,6 +197,7 @@ const StudentRegister = () => {
                 placeholder="Re-enter your password"
                 value={form.confirmPassword}
                 onChange={handleChange}
+                required
               />
             </div>
           </div>
@@ -110,92 +209,47 @@ const StudentRegister = () => {
 
           <div className="row g-3 mt-1">
             <div className="col-md-6">
-              <label className="form-label">Grade/Level *</label>
+              <label className="form-label">Target Domain *</label>
               <select
-                name="grade"
+                name="targetDomain"
                 className="form-select register-input"
-                value={form.grade}
+                value={form.targetDomain}
                 onChange={handleChange}
+                required
               >
-                <option value="">Select your current grade/level</option>
-                <option>High School</option>
-                <option>Undergraduate</option>
-                <option>Postgraduate</option>
-                <option>Working Professional</option>
+                <option value="">Select your target domain</option>
+                {domains.map((domain) => (
+                  <option key={domain} value={domain}>
+                    {domain}
+                  </option>
+                ))}
               </select>
             </div>
-          </div>
-
-          <div className="mt-3">
-            <label className="form-label">
-              Subjects of Interest * (Select all that apply)
-            </label>
-            <div className="register-pill-box">
-              <div className="row">
-                {subjects.map((subj) => (
-                  <div key={subj} className="col-md-4 col-sm-6">
-                    <div className="form-check mb-2">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        id={subj}
-                      />
-                      <label
-                        className="form-check-label"
-                        htmlFor={subj}
-                      >
-                        {subj}
-                      </label>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <div className="col-md-6">
+              <label className="form-label">Qualification</label>
+              <input
+                name="qualification"
+                type="text"
+                className="form-control register-input"
+                placeholder="e.g., B.Tech, BCA, MBA"
+                value={form.qualification}
+                onChange={handleChange}
+              />
             </div>
-          </div>
-
-          {/* Learning Goals */}
-          <div className="mt-3">
-            <label className="form-label">
-              Learning Goals (Optional)
-            </label>
-            <textarea
-              name="goals"
-              rows="3"
-              className="form-control register-input"
-              placeholder="Tell us about your learning goals and what you hope to achieve with mentorship..."
-              value={form.goals}
-              onChange={handleChange}
-            />
-          </div>
-
-          {/* Terms */}
-          <div className="form-check mt-4">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              id="student-terms"
-              name="agree"
-              checked={form.agree}
-              onChange={handleChange}
-            />
-            <label className="form-check-label" htmlFor="student-terms">
-              I agree to the{" "}
-              <span className="link-inline">Terms and Conditions</span> and{" "}
-              <span className="link-inline">Privacy Policy</span>
-            </label>
           </div>
 
           {/* Button */}
           <button
             type="submit"
             className="btn w-100 register-primary-btn mt-4"
+            disabled={loading}
           >
-            👤 Create Account
+            {loading ? "Creating Account..." : "👤 Create Account"}
           </button>
 
           <p className="text-center mt-3 mb-0 small-text">
             Already have an account?{" "}
-            <Link to="/" className="link-inline">
+            <Link to="/login" className="link-inline">
               Sign In
             </Link>
           </p>

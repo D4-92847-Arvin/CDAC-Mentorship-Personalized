@@ -30,3 +30,7 @@ yarn-error.log*
 
 # coverage reports
 /coverage
+
+client/package-lock.json
+
+client/node_modules/

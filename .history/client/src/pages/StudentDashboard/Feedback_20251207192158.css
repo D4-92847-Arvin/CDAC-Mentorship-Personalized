@@ -1,0 +1,114 @@
+.feedback-page {
+  padding: 32px 40px;
+  background: #f8fafc;
+  min-height: 100vh;
+}
+.feedback-page h2 {
+  font-size: 2rem;
+  margin-bottom: 0.2em;
+}
+.feedback-page > p {
+  color: #64748b;
+  margin-bottom: 24px;
+}
+.feedback-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 28px 28px 18px 28px;
+  max-width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.feedback-section-title {
+  font-weight: 600;
+  margin-bottom: 12px;
+  font-size: 1.1rem;
+}
+.feedback-label {
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #22223b;
+}
+.feedback-rating-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.feedback-stars {
+  display: flex;
+  gap: 8px;
+  font-size: 1.7rem;
+}
+.star {
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.star.filled {
+  color: #fbbf24;
+}
+.feedback-textarea {
+  width: 100%;
+  min-height: 60px;
+  border-radius: 8px;
+  border: 1.5px solid #e2e8f0;
+  padding: 10px 14px;
+  font-size: 1.05rem;
+  margin-bottom: 10px;
+  resize: vertical;
+}
+.feedback-options-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  margin-bottom: 10px;
+}
+.feedback-option-btn {
+  flex: 1 1 220px;
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 0;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background 0.2s, border 0.2s, color 0.2s;
+}
+.feedback-option-btn.selected, .feedback-option-btn:active {
+  background: #f1f5ff;
+  border: 1.5px solid #1e40af;
+  color: #1e40af;
+}
+.feedback-submit-btn {
+  width: 100%;
+  background: #1e40af;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 0;
+  font-size: 1.08rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.send-icon {
+  font-size: 1.1em;
+}
+@media (max-width: 1100px) {
+  .feedback-card {
+    padding: 18px 8px;
+  }
+}

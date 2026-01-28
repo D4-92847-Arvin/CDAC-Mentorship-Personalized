@@ -49,13 +49,20 @@ public class JwtUtils {
 		
 		CustomUserDetails userPrincipal =
 			    (CustomUserDetails) authentication.getPrincipal();
-
+		
+		List<String> authorities = getAuthoritiesInString(authentication.getAuthorities());
+		log.info("User authorities: {}", authorities);
+		log.info("User role from entity: {}", userPrincipal.getUser().getUserRole());
 	
 		
-		return Jwts.builder().subject(authentication.getName()).issuedAt(new Date())
+		return Jwts.builder()
+				.subject(authentication.getName()) // email
+				.issuedAt(new Date())
 				.expiration(new Date((new Date()).getTime() + jwtExpirationMs))
 				.claim("userId", userPrincipal.getUserId())
-				.claim("authorities", getAuthoritiesInString(authentication.getAuthorities()))
+				.claim("email", userPrincipal.getUsername()) // email
+				.claim("name", userPrincipal.getFullName()) // full name
+				.claim("authorities", authorities)
 				.signWith(key,Jwts.SIG.HS256)
 				.compact();
 	}

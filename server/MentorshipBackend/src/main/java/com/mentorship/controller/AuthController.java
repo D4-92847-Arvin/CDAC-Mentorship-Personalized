@@ -15,16 +15,17 @@ import com.mentorship.dtos.AuthRequest;
 import com.mentorship.dtos.AuthResponse;
 import com.mentorship.dtos.MentorSignupRequest;
 import com.mentorship.dtos.StudentSignupRequest;
-import com.mentorship.dtos.UserResp;
 import com.mentorship.security.JwtUtils;
 import com.mentorship.service.AuthServiceImpl;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/users")
 @AllArgsConstructor
+@Slf4j
 public class AuthController {
 	
 	private AuthServiceImpl authService;
@@ -33,16 +34,12 @@ public class AuthController {
 	
 	@PostMapping("/signin")
 	public ResponseEntity<?> signin(@RequestBody @Valid AuthRequest request) {
-		System.out.println("in sign in" +request);
+		log.info("Sign in attempt for email: {}", request.getEmail());
 		Authentication authToken = new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
-		//check
-		System.out.println("before - "+authToken.isAuthenticated());
 		
 		Authentication validAuth = authenticationManager.authenticate(authToken);
 		
-		//check
-		System.out.println("after - "+validAuth.isAuthenticated());
-		System.out.println(validAuth);
+		log.info("User authenticated successfully: {}", request.getEmail());
 		
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(new AuthResponse("Successful login !",
@@ -51,16 +48,32 @@ public class AuthController {
 	
 	@PostMapping("/signup/student")
 	public ResponseEntity<?> registerStudent(@RequestBody @Valid StudentSignupRequest dto) {
-		return ResponseEntity
-				.status(HttpStatus.CREATED)
-				.body(authService.registerStudent(dto));
-		
+		log.info("Student registration request for email: {}", dto.getEmail());
+		try {
+			ApiResponse response = authService.registerStudent(dto);
+			log.info("Student registered successfully: {}", dto.getEmail());
+			return ResponseEntity
+					.status(HttpStatus.CREATED)
+					.body(response);
+		} catch (Exception e) {
+			log.error("Student registration failed: {}", dto.getEmail(), e);
+			throw e;
+		}
 	}
 
 	@PostMapping("/signup/mentor")
-	public UserResp registerMentor(@RequestBody MentorSignupRequest dto) {
-		return null;
-		
+	public ResponseEntity<?> registerMentor(@RequestBody @Valid MentorSignupRequest dto) {
+		log.info("Mentor registration request for email: {}", dto.getEmail());
+		try {
+			ApiResponse response = authService.registerMentor(dto);
+			log.info("Mentor registered successfully: {}", dto.getEmail());
+			return ResponseEntity
+					.status(HttpStatus.CREATED)
+					.body(response);
+		} catch (Exception e) {
+			log.error("Mentor registration failed: {}", dto.getEmail(), e);
+			throw e;
+		}
 	}
 	
 	

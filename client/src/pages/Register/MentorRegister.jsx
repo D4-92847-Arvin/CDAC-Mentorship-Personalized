@@ -1,54 +1,109 @@
 import React, { useState } from "react";
 import "./Registration.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { registerMentor } from "../../API/authService";
 
 const MentorRegister = () => {
   const [form, setForm] = useState({
-    fullName: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
+    dob: "",
+    address: "",
+    phoneNo: "",
     specialization: "",
     experience: "",
-    education: "",
-    position: "",
-    organization: "",
-    bio: "",
-    linkedin: "",
-    portfolio: "",
-    agree: false,
+    ratePerSession: "",
+    discountPercent: "",
   });
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value,
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Mentor registration data:", form);
-    alert("Mentor application submitted (mock)!");
+    setError("");
+    setLoading(true);
+
+    try {
+      // Validate required fields
+      if (!form.firstName || !form.email || !form.password || !form.specialization || !form.experience || !form.ratePerSession) {
+        setError("Please fill in all required fields");
+        setLoading(false);
+        return;
+      }
+
+      // Validate passwords match
+      if (form.password !== form.confirmPassword) {
+        setError("Passwords do not match");
+        setLoading(false);
+        return;
+      }
+
+      // Validate rate is a valid number
+      const rate = parseFloat(form.ratePerSession);
+      if (isNaN(rate) || rate <= 0) {
+        setError("Please enter a valid rate per session");
+        setLoading(false);
+        return;
+      }
+
+      // Call backend signup
+      const signupData = {
+        firstName: form.firstName,
+        lastName: form.lastName || "",
+        email: form.email,
+        password: form.password,
+        dob: form.dob || null,
+        address: form.address || "",
+        phoneNo: form.phoneNo || "",
+        specialization: form.specialization,
+        experience: form.experience,
+        ratePerSession: rate,
+        discountPercent: form.discountPercent ? parseFloat(form.discountPercent) : 0,
+      };
+
+      await registerMentor(signupData);
+      
+      alert("Mentor application submitted successfully! Your account is pending admin verification.");
+      navigate("/login");
+    } catch (err) {
+      console.error("Registration error:", err);
+      setError(err.message || "Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const expertise = [
-    "Algorithm Design",
-    "Data Structures",
+  const specializations = [
     "Web Development",
     "Mobile Development",
+    "Data Science",
     "Machine Learning",
-    "AI & Deep Learning",
     "Cloud Computing",
     "DevOps",
     "Cybersecurity",
-    "Database Design",
-    "System Design",
-    "Career Guidance",
-    "Interview Preparation",
-    "Research & Publications",
-    "Project Management",
+    "UI/UX Design",
+    "Business Analysis",
+    "Other",
+  ];
+
+  const experiences = [
+    "0-2 years",
+    "3-5 years",
+    "6-10 years",
+    "10+ years",
   ];
 
   return (
@@ -68,17 +123,36 @@ const MentorRegister = () => {
         </div>
 
         <form onSubmit={handleSubmit}>
+          {error && (
+            <div className="alert alert-danger" role="alert">
+              {error}
+            </div>
+          )}
+
           {/* Personal Information */}
           <h5 className="section-title mt-4">Personal Information</h5>
           <div className="row g-3 mt-1">
             <div className="col-md-6">
-              <label className="form-label">Full Name *</label>
+              <label className="form-label">First Name *</label>
               <input
-                name="fullName"
+                name="firstName"
                 type="text"
                 className="form-control register-input"
-                placeholder="Dr. Sanju Sharma"
-                value={form.fullName}
+                placeholder="John"
+                value={form.firstName}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="col-md-6">
+              <label className="form-label">Last Name</label>
+              <input
+                name="lastName"
+                type="text"
+                className="form-control register-input"
+                placeholder="Doe"
+                value={form.lastName}
                 onChange={handleChange}
               />
             </div>
@@ -89,8 +163,44 @@ const MentorRegister = () => {
                 name="email"
                 type="email"
                 className="form-control register-input"
-                placeholder="sanju.sharma@example.com"
+                placeholder="john@example.com"
                 value={form.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="col-md-6">
+              <label className="form-label">Date of Birth</label>
+              <input
+                name="dob"
+                type="date"
+                className="form-control register-input"
+                value={form.dob}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="col-md-6">
+              <label className="form-label">Phone Number</label>
+              <input
+                name="phoneNo"
+                type="tel"
+                className="form-control register-input"
+                placeholder="+91 98765 43210"
+                value={form.phoneNo}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="col-md-6">
+              <label className="form-label">Address</label>
+              <input
+                name="address"
+                type="text"
+                className="form-control register-input"
+                placeholder="Your address"
+                value={form.address}
                 onChange={handleChange}
               />
             </div>
@@ -101,9 +211,10 @@ const MentorRegister = () => {
                 name="password"
                 type="password"
                 className="form-control register-input"
-                placeholder="At least 8 characters"
+                placeholder="At least 6 characters"
                 value={form.password}
                 onChange={handleChange}
+                required
               />
             </div>
 
@@ -116,6 +227,7 @@ const MentorRegister = () => {
                 placeholder="Re-enter your password"
                 value={form.confirmPassword}
                 onChange={handleChange}
+                required
               />
             </div>
           </div>
@@ -132,12 +244,14 @@ const MentorRegister = () => {
                 className="form-select register-input"
                 value={form.specialization}
                 onChange={handleChange}
+                required
               >
                 <option value="">Select your specialization</option>
-                <option>Computer Science</option>
-                <option>Mathematics</option>
-                <option>Data Science</option>
-                <option>Career Guidance</option>
+                {specializations.map((spec) => (
+                  <option key={spec} value={spec}>
+                    {spec}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -148,167 +262,55 @@ const MentorRegister = () => {
                 className="form-select register-input"
                 value={form.experience}
                 onChange={handleChange}
+                required
               >
                 <option value="">Select years of experience</option>
-                <option>0–2 years</option>
-                <option>3–5 years</option>
-                <option>6–10 years</option>
-                <option>10+ years</option>
-              </select>
-            </div>
-
-            <div className="col-md-6">
-              <label className="form-label">Highest Education *</label>
-              <select
-                name="education"
-                className="form-select register-input"
-                value={form.education}
-                onChange={handleChange}
-              >
-                <option value="">Select your highest education</option>
-                <option>Bachelor&apos;s</option>
-                <option>Master&apos;s</option>
-                <option>PhD</option>
-                <option>Other</option>
-              </select>
-            </div>
-
-            <div className="col-md-6">
-              <label className="form-label">Current Position *</label>
-              <input
-                name="position"
-                type="text"
-                className="form-control register-input"
-                placeholder="e.g., Senior Software Engineer"
-                value={form.position}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="col-md-6">
-              <label className="form-label">Organization *</label>
-              <input
-                name="organization"
-                type="text"
-                className="form-control register-input"
-                placeholder="e.g., Google, Stanford University"
-                value={form.organization}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          <div className="mt-3">
-            <label className="form-label">Professional Bio *</label>
-            <p className="small-text mb-1">
-              Share your background, teaching philosophy, and what you can offer
-              to students (minimum 50 characters)
-            </p>
-            <textarea
-              name="bio"
-              rows="4"
-              className="form-control register-input"
-              value={form.bio}
-              onChange={handleChange}
-            />
-          </div>
-
-          {/* Areas of Expertise */}
-          <div className="mt-3">
-            <label className="form-label">Areas of Expertise *</label>
-            <p className="small-text mb-1">
-              Select all areas where you can provide mentorship
-            </p>
-            <div className="register-pill-box">
-              <div className="row">
-                {expertise.map((area) => (
-                  <div key={area} className="col-md-4 col-sm-6">
-                    <div className="form-check mb-2">
-                      <input
-                        type="checkbox"
-                        className="form-check-input"
-                        id={area}
-                      />
-                      <label
-                        className="form-check-label"
-                        htmlFor={area}
-                      >
-                        {area}
-                      </label>
-                    </div>
-                  </div>
+                {experiences.map((exp) => (
+                  <option key={exp} value={exp}>
+                    {exp}
+                  </option>
                 ))}
-              </div>
+              </select>
             </div>
-          </div>
 
-          {/* Additional Info */}
-          <h5 className="section-title mt-4">
-            Additional Information (Optional)
-          </h5>
-          <div className="row g-3 mt-1">
             <div className="col-md-6">
-              <label className="form-label">LinkedIn Profile</label>
+              <label className="form-label">Rate Per Session (₹) *</label>
               <input
-                name="linkedin"
-                type="url"
+                name="ratePerSession"
+                type="number"
                 className="form-control register-input"
-                placeholder="https://linkedin.com/in/yourprofile"
-                value={form.linkedin}
+                placeholder="e.g., 500"
+                value={form.ratePerSession}
                 onChange={handleChange}
+                min="0"
+                step="0.01"
+                required
               />
             </div>
 
             <div className="col-md-6">
-              <label className="form-label">Portfolio/Website</label>
+              <label className="form-label">Discount Percent (%)</label>
               <input
-                name="portfolio"
-                type="url"
+                name="discountPercent"
+                type="number"
                 className="form-control register-input"
-                placeholder="https://yourportfolio.com"
-                value={form.portfolio}
+                placeholder="e.g., 10"
+                value={form.discountPercent}
                 onChange={handleChange}
+                min="0"
+                max="100"
+                step="0.01"
               />
             </div>
-          </div>
-
-          <div className="upload-box mt-3">
-            <p className="mb-1 fw-semibold">Upload Resume/CV (Optional)</p>
-            <div className="upload-inner">
-              <span className="upload-icon">⬆️</span>
-              <p className="mb-0">
-                Click to upload resume
-                <br />
-                <span className="small-text">PDF, DOC, DOCX (max 5MB)</span>
-              </p>
-            </div>
-          </div>
-
-          {/* Terms */}
-          <div className="form-check mt-4">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              id="mentor-terms"
-              name="agree"
-              checked={form.agree}
-              onChange={handleChange}
-            />
-            <label className="form-check-label" htmlFor="mentor-terms">
-              I agree to the{" "}
-              <span className="link-inline">Terms and Conditions</span> and{" "}
-              <span className="link-inline">Privacy Policy</span>. I understand
-              that my application will be reviewed by the admin team for
-              verification.
-            </label>
           </div>
 
           {/* Button */}
           <button
             type="submit"
             className="btn w-100 register-primary-btn mt-4"
+            disabled={loading}
           >
-            📩 Submit Application
+            {loading ? "Submitting Application..." : "📩 Submit Application"}
           </button>
 
           <p className="text-center mt-3 mb-0 small-text">
@@ -324,4 +326,3 @@ const MentorRegister = () => {
 };
 
 export default MentorRegister;
- 

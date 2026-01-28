@@ -1,10 +1,14 @@
 import React from "react";
 import "./Sidebar.css";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../API/AuthContext";
 
 const Sidebar = ({ activeTab, onTabChange }) => {
   const navigation = useNavigate();
+  const { logout } = useAuth();
+
   const onLogout = () => {
+    logout();
     navigation("/");
   };
   return (

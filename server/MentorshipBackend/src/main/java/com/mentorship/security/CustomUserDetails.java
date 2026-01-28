@@ -40,6 +40,19 @@ public class CustomUserDetails implements UserDetails {
 		return user.getUserId();
 
 	}
+	
+	public String getFullName() {
+		String firstName = user.getFirstName();
+		String lastName = user.getLastName();
+		if (lastName != null && !lastName.isEmpty()) {
+			return firstName + " " + lastName;
+		}
+		return firstName;
+	}
+	
+	public User getUser() {
+		return user;
+	}
 
 	@Override
 	public boolean isAccountNonExpired() {

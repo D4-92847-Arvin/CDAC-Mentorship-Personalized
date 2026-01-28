@@ -1,9 +1,28 @@
 // src/components/Navbar/Navbar.jsx
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./Navbar.css";
+import { useAuth } from "../../API/AuthContext";
 
 const Navbar = () => {
+  const { isAuthenticated, logout, hasRole } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
+  const handleDashboardClick = () => {
+    if (hasRole("student")) {
+      navigate("/student-dashboard");
+    } else if (hasRole("mentor")) {
+      navigate("/mentor/dashboard");
+    } else if (hasRole("admin")) {
+      navigate("/admin-dashboard");
+    }
+  };
+
   return (
     <nav className="mp-navbar shadow-sm">
       <div className="container d-flex align-items-center justify-content-between">
@@ -26,11 +45,26 @@ const Navbar = () => {
           </li>
         </ul>
 
-        {/* Sign In Button */}
+        {/* Sign In / Logout Button */}
         <div>
-          <Link to="/login" className="btn mp-signin-btn">
-            Sign In
-          </Link>
+          {isAuthenticated ? (
+            <div className="d-flex gap-2 align-items-center">
+              <button
+                onClick={handleDashboardClick}
+                className="btn mp-signin-btn"
+                style={{ marginRight: "10px" }}
+              >
+                Dashboard
+              </button>
+              <button onClick={handleLogout} className="btn btn-outline-danger">
+                Logout
+              </button>
+            </div>
+          ) : (
+            <Link to="/login" className="btn mp-signin-btn">
+              Sign In
+            </Link>
+          )}
         </div>
       </div>
     </nav>
