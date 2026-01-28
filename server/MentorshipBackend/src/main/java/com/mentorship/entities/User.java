@@ -27,7 +27,7 @@ import lombok.ToString;
 public class User extends BaseEntity{
 	@Id //PK constraint
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long userId;
+	private Long userId;
 	
 	@Column(name="first_name",length = 30, nullable=false)
 	private String firstName;
