@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../API/AuthContext";
 import "./StudentDashboard.css";
 import MyMentor from "../MyMentor/MyMentor";
 import MySessions from "../MySessions/MySessions";
@@ -19,8 +20,10 @@ const sidebarItems = [
 const StudentDashboard = () => {
   const [activeTab, setActiveTab] = useState("Dashboard");
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const handleLogout = () => {
+    logout();
     navigate("/");
   };
 

@@ -9,21 +9,36 @@ import Home from "./pages/Home/Home";
 import { ToastContainer } from "react-toastify";
 import Dashboard from "./pages/MentorDashBoard/Dashboard/Dashboard";
 import StudentDashboard from "./pages/StudentDashboard/Main/StudentDashboard";
+import { ProtectedRoute, PublicRoute } from "./API/ProtectedRoute";
 
 function App() {
   return (
     <div>
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<PublicRoute element={<Login />} />} />
         <Route path="/mentors" element={<MentorListing />} />
+        <Route path="/register/mentor" element={<PublicRoute element={<MentorRegister />} />} />
+        <Route path="/register/student" element={<PublicRoute element={<StudentRegister />} />} />
 
-        <Route path="/admin-dashboard" element={<Overview />} />
-        <Route path="/student-dashboard" element={<StudentDashboard />} />
-        <Route path="/register/mentor" element={<MentorRegister />} />
-        <Route path="/register/student" element={<StudentRegister />} />        
-        <Route path="/mentor/*" element={<Dashboard />} />
+        {/* Protected Routes - Student */}
+        <Route
+          path="/student-dashboard"
+          element={<ProtectedRoute element={<StudentDashboard />} requiredRole="student" />}
+        />
 
+        {/* Protected Routes - Mentor */}
+        <Route
+          path="/mentor/*"
+          element={<ProtectedRoute element={<Dashboard />} requiredRole="mentor" />}
+        />
+
+        {/* Protected Routes - Admin */}
+        <Route
+          path="/admin-dashboard"
+          element={<ProtectedRoute element={<Overview />} requiredRole="admin" />}
+        />
       </Routes>
       <ToastContainer />
     </div>

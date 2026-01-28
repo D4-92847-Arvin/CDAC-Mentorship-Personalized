@@ -47,7 +47,7 @@ public class User extends BaseEntity{
 	@Lob
 	private byte[] image;
 	
-	@Column(name="phone_no",length=14, unique = true)
+	@Column(name="phone_no",length=14, unique = true, nullable = true)
 	private String phoneNo;
 	
 	@Enumerated(EnumType.STRING)

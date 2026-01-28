@@ -1,7 +1,16 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../../../API/AuthContext";
 import "./Sidebar.css";
 
 function Sidebar() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
   return (
     <aside className="sidebar">
       <div className="brand">
@@ -59,7 +68,7 @@ function Sidebar() {
         </NavLink>
       </nav>
       
-      <button className="logout-btn">Logout</button>
+      <button className="logout-btn" onClick={handleLogout}>Logout</button>
     </aside>
   )
 }
