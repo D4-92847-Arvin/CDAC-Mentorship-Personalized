@@ -8,9 +8,8 @@ import com.mentorship.entities.Mentor;
 import com.mentorship.entities.VerificationStatus;
 
 public interface MentorRepository extends JpaRepository<Mentor, Long> {
-	 List<Mentor> findByVerificationStatus(VerificationStatus status);
+	List<Mentor> findByVerificationStatus(VerificationStatus status);
 
-	    // Get verified mentors by specialization (case-insensitive, partial match)
-	    List<Mentor> findByVerificationStatusAndSpecializationContainingIgnoreCase(
-	            VerificationStatus status,String specialization);
+    List<Mentor> findByVerificationStatusAndSpecializationContainingIgnoreCase(
+            VerificationStatus status, String specialization);
 }
