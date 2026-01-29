@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -26,6 +27,7 @@ import com.mentorship.service.StudentService;
 
 @RestController
 @RequestMapping("/api/student")
+@CrossOrigin(origins = "http://localhost:5173")
 public class StudentController {
 	
 	@Autowired
@@ -73,6 +75,12 @@ public class StudentController {
 	public ResponseEntity<List<MentorDTO>> getVerifiedMentors(
 	@RequestParam(required = false) String domain) {
 	return ResponseEntity.ok(studentService.getVerifiedMentors(domain));
+	}
+
+	// Get Mentor Details by ID
+	@GetMapping("/mentor/{mentorId}")
+	public ResponseEntity<MentorDTO> getMentorDetails(@PathVariable Long mentorId) {
+	return ResponseEntity.ok(studentService.getMentorDetails(mentorId));
 	}
 
 	//  Book Session

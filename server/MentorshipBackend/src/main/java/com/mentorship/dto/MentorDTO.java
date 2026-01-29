@@ -10,4 +10,8 @@ public class MentorDTO {
     private String name;
     private String specialization;
     private double ratePerSession;
+    private String email;
+    private String experience;
+    private String about;
+    private String expertise;
 }

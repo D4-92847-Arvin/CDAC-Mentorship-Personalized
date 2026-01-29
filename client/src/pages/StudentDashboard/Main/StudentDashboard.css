@@ -106,6 +106,46 @@
   height: 100vh;
   overflow-y: auto;
 }
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+}
+
+.dashboard-header p {
+  margin: 8px 0 0 0;
+  color: #64748b;
+}
+
+.edit-profile-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  white-space: nowrap;
+}
+
+.edit-profile-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.6);
+}
+
+.edit-profile-btn:active {
+  transform: translateY(0);
+}
+
 .stats-row {
   display: flex;
   gap: 24px;
@@ -289,8 +329,108 @@
   border-radius: 50%;
   margin-right: 8px;
 }
-@media (max-width: 1100px) {
-  .dashboard-widgets {
+
+/* Loading and Error States */
+.loading-container,
+.error-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.error-container button {
+  padding: 0.5rem 1.5rem;
+  background: #1e3a8a;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.error-container button:hover {
+  background: #1e3a8a;
+  opacity: 0.9;
+}
+
+.alert-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+  color: #856404;
+}
+
+.alert-banner button {
+  background: none;
+  border: none;
+  color: #856404;
+  cursor: pointer;
+  font-size: 1.25rem;
+}
+
+.alert-banner button:hover {
+  opacity: 0.7;
+}
+
+.error-message {
+  background: #f8d7da;
+  border-left: 4px solid #dc3545;
+  color: #721c24;
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.error-message button {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 1rem;
+}
+
+.error-message button:hover {
+  background: #c82333;
+}
+
+.success-message {
+  background: #d4edda;
+  border-left: 4px solid #28a745;
+  color: #155724;
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 4px;
+}
+
+.no-sessions,
+.no-feedback {
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+}
+
+.no-sessions p,
+.no-feedback p {
+  margin: 0.5rem 0;
+}
+
+.text-muted {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
     grid-template-columns: 1fr;
     grid-template-rows: auto;
   }
@@ -298,4 +438,175 @@
     grid-column: 1 / 2;
     grid-row: auto;
   }
+}
+/* DARK MODE STYLES */
+.student-dashboard.dark-mode {
+  background: #1a1a1a;
+}
+
+.student-dashboard.dark-mode .sidebar {
+  background: #2d2d2d;
+  color: #e0e0e0;
+  border-right-color: #444;
+}
+
+.student-dashboard.dark-mode .sidebar-item {
+  color: #b0b0b0;
+}
+
+.student-dashboard.dark-mode .sidebar-item:hover {
+  background: #3a3a3a;
+}
+
+.student-dashboard.dark-mode .sidebar-item.active {
+  background: #667eea;
+  color: #fff;
+}
+
+.student-dashboard.dark-mode .logo-title {
+  color: #e0e0e0;
+}
+
+.student-dashboard.dark-mode .dashboard-content {
+  background: #1a1a1a;
+  color: #e0e0e0;
+}
+
+.student-dashboard.dark-mode h1,
+.student-dashboard.dark-mode h2,
+.student-dashboard.dark-mode h3,
+.student-dashboard.dark-mode h4,
+.student-dashboard.dark-mode h5 {
+  color: #fff;
+}
+
+.student-dashboard.dark-mode .stat-box {
+  background: #2d2d2d;
+  color: #e0e0e0;
+  border-color: #444;
+}
+
+.student-dashboard.dark-mode .alert-banner {
+  background: #3a3a3a;
+  color: #e0e0e0;
+  border-color: #667eea;
+}
+
+.student-dashboard.dark-mode .tabs {
+  background: #2d2d2d;
+  border-color: #444;
+}
+
+.student-dashboard.dark-mode .tabs button {
+  color: #b0b0b0;
+  border-color: #444;
+}
+
+.student-dashboard.dark-mode .tabs button.active {
+  color: #667eea;
+  border-color: #667eea;
+}
+
+.student-dashboard.dark-mode .btn {
+  background: #3a3a3a;
+  color: #e0e0e0;
+  border-color: #555;
+}
+
+.student-dashboard.dark-mode .btn:hover {
+  background: #4a4a4a;
+}
+
+.student-dashboard.dark-mode .btn-light {
+  background: #3a3a3a;
+  color: #e0e0e0;
+  border-color: #555;
+}
+
+.student-dashboard.dark-mode .btn-light:hover {
+  background: #4a4a4a;
+}
+
+.student-dashboard.dark-mode .edit-profile-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+}
+
+.student-dashboard.dark-mode .edit-profile-btn:hover {
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.7);
+}
+
+.btn-dark-mode-toggle {
+  background: #3a3a3a;
+  color: #e0e0e0;
+  border: 1px solid #555;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-size: 18px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.btn-dark-mode-toggle:hover {
+  background: #4a4a4a;
+  border-color: #667eea;
+}
+
+.student-dashboard.dark-mode .loading-container,
+.student-dashboard.dark-mode .error-container {
+  background: #2d2d2d;
+  color: #e0e0e0;
+}
+
+.student-dashboard.dark-mode .card,
+.student-dashboard.dark-mode .sessions-card,
+.student-dashboard.dark-mode .mentor-profile-card,
+.student-dashboard.dark-mode .feedback-form,
+.student-dashboard.dark-mode .section-card,
+.student-dashboard.dark-mode .modal-content {
+  background: #2d2d2d;
+  color: #e0e0e0;
+  border-color: #444;
+}
+
+.student-dashboard.dark-mode input,
+.student-dashboard.dark-mode textarea,
+.student-dashboard.dark-mode select {
+  background: #3a3a3a;
+  color: #e0e0e0;
+  border-color: #555;
+}
+
+.student-dashboard.dark-mode input::placeholder,
+.student-dashboard.dark-mode textarea::placeholder {
+  color: #888;
+}
+
+.student-dashboard.dark-mode input:focus,
+.student-dashboard.dark-mode textarea:focus,
+.student-dashboard.dark-mode select:focus {
+  border-color: #667eea;
+  background: #3a3a3a;
+  color: #e0e0e0;
+}
+
+.student-dashboard.dark-mode .table {
+  background: #2d2d2d;
+  color: #e0e0e0;
+}
+
+.student-dashboard.dark-mode .table th {
+  background: #3a3a3a;
+  color: #e0e0e0;
+  border-color: #555;
+}
+
+.student-dashboard.dark-mode .table td {
+  border-color: #444;
+}
+
+.student-dashboard.dark-mode .modal-overlay {
+  background: rgba(0, 0, 0, 0.8);
 }

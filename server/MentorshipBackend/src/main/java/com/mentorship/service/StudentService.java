@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import com.mentorship.dto.FeedbackRequestDTO;
 import com.mentorship.dto.FeedbackResponseDTO;
 import com.mentorship.dto.MentorDTO;
-import com.mentorship.dto.SessionDTO;
+
 import com.mentorship.dto.StudentDTO;
 import com.mentorship.dto.StudentDashboardDTO;
 import com.mentorship.dto.StudentSessionDTO;
@@ -85,7 +85,9 @@ public class StudentService {
 		Student student = studentRepository.findById(id)
 		.orElseThrow(() -> new RuntimeException("Student not found"));
 
-
+		student.getUserDetails().setEmail(dto.getEmail());
+		student.getUserDetails().setFirstName(dto.getFirstName());
+		student.getUserDetails().setLastName(dto.getLastName());
 		student.setTargetDomain(dto.getTargetDomain());
 		student.setQualification(dto.getQualification());
 		studentRepository.save(student);
@@ -139,8 +141,30 @@ public class StudentService {
 	        dto.setName(m.getUserDetails().getFirstName() + " " + m.getUserDetails().getLastName());
 	        dto.setSpecialization(m.getSpecialization());
 	        dto.setRatePerSession(m.getRatePerSession());
+	        dto.setEmail(m.getUserDetails().getEmail());
+	        dto.setExperience(m.getExperience());
+	        dto.setAbout(m.getSpecialization()); // Using specialization as about for now
+	        dto.setExpertise(m.getSpecialization()); // Will be populated by expertise field
 	        return dto;
 	    }).toList();
+	}
+
+	// Get Mentor Details by ID
+	public MentorDTO getMentorDetails(Long mentorId) {
+	    Mentor mentor = mentorRepository.findById(mentorId)
+	            .orElseThrow(() -> new RuntimeException("Mentor not found"));
+	    
+	    MentorDTO dto = new MentorDTO();
+	    dto.setMentorId(mentor.getMentorId());
+	    dto.setName(mentor.getUserDetails().getFirstName() + " " + mentor.getUserDetails().getLastName());
+	    dto.setSpecialization(mentor.getSpecialization());
+	    dto.setRatePerSession(mentor.getRatePerSession());
+	    dto.setEmail(mentor.getUserDetails().getEmail());
+	    dto.setExperience(mentor.getExperience());
+	    dto.setAbout(mentor.getSpecialization());
+	    dto.setExpertise(mentor.getSpecialization());
+	    
+	    return dto;
 	}
 	
 	// Book Session
