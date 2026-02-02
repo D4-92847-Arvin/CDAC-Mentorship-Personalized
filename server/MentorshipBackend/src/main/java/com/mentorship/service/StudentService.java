@@ -50,6 +50,12 @@ public class StudentService {
 				.orElseThrow(() -> new RuntimeException("Student not found"));
 		return mapToDTO(student);	
 	}
+
+	public StudentDTO getStudentByUserId(Long userId) {
+		Student student = studentRepository.findByUserDetailsUserId(userId)
+				.orElseThrow(() -> new RuntimeException("Student not found for user"));
+		return mapToDTO(student);	
+	}
 	
 
 	public List<StudentDTO> getAllStudents() {

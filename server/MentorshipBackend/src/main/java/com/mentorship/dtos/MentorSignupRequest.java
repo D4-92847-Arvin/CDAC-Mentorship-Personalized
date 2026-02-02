@@ -46,4 +46,21 @@ public class MentorSignupRequest {
 	    private Double ratePerSession;
 
 	    private Double discountPercent;
+	    
+	    @NotBlank
+	    private String highestEducation;
+
+	    @NotBlank
+	    private String currentPosition;
+
+	    @NotBlank
+	    private String organization;
+
+	    @NotBlank
+	    @Size(min = 50)
+	    private String professionalBio;
+	    
+	    private String linkedinUrl;
+
+	    private String portfolioUrl;
 }

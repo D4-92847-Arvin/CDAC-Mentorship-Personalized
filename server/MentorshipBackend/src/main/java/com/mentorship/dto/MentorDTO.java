@@ -14,4 +14,5 @@ public class MentorDTO {
     private String experience;
     private String about;
     private String expertise;
+    private String verificationStatus;
 }
