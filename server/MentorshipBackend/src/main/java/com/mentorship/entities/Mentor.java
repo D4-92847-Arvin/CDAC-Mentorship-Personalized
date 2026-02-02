@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -17,7 +18,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import jakarta.persistence.ForeignKey;
 
 
 @Entity
@@ -48,6 +48,9 @@ public class Mentor extends BaseEntity{
 	
 	@Column(name="discount_percent")
 	private double discountPercent;
+	
+	@Column(name="is_deleted")
+	private boolean deleted = false;
 	
 	@Enumerated(EnumType.STRING)
 	@Column(name="verification_status",length = 20)
