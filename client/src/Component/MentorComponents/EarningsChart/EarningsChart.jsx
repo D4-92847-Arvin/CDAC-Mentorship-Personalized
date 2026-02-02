@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Bar } from "react-chartjs-2";
 import "./EarningsChart.css";
 import {
@@ -8,10 +9,63 @@ import {
   Tooltip,
   Legend
 } from "chart.js";
+import { getMonthlyEarnings } from '../../../services/mentorService';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
-function EarningsChart({ showBadge = true }) {
+function EarningsChart({ mentorId = 1, showBadge = true }) {
+  const [chartData, setChartData] = useState({
+    labels: [],
+    datasets: [{
+      data: [],
+      backgroundColor: "#0d9488",
+      borderRadius: 6,
+      barThickness: 40
+    }]
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (mentorId) {
+      fetchMonthlyEarnings();
+    }
+  }, [mentorId]);
+
+  const fetchMonthlyEarnings = async () => {
+    try {
+      setLoading(true);
+      const response = await getMonthlyEarnings(mentorId);
+      
+      if (response.success && response.data) {
+        const months = response.data.map(item => item.month);
+        const earnings = response.data.map(item => item.earnings);
+        
+        setChartData({
+          labels: months,
+          datasets: [{
+            data: earnings,
+            backgroundColor: "#0d9488",
+            borderRadius: 6,
+            barThickness: 40
+          }]
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load monthly earnings:', error);
+      // Use default data on error
+      setChartData({
+        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+        datasets: [{
+          data: [0, 0, 0, 0, 0, 0],
+          backgroundColor: "#0d9488",
+          borderRadius: 6,
+          barThickness: 40
+        }]
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   const options = {
     responsive: true,
     maintainAspectRatio: false,
@@ -29,7 +83,7 @@ function EarningsChart({ showBadge = true }) {
         displayColors: false,
         callbacks: {
           label: function(context) {
-            return `amount : ${context.raw}`;
+            return `₹${context.raw.toLocaleString('en-IN')}`;
           }
         }
       }
@@ -56,22 +110,21 @@ function EarningsChart({ showBadge = true }) {
         },
         ticks: {
           color: '#9ca3af',
-          stepSize: 1500
+          callback: function(value) {
+            // Only show whole numbers
+            if (value % 1 === 0) {
+              return '₹' + value.toLocaleString('en-IN');
+            }
+            return '';
+          },
+          stepSize: 1000, // Minimum step of ₹1000
+          precision: 0
         },
         min: 0,
-        max: 6000
+        suggestedMax: 5000, // Suggest minimum scale of ₹5000
+        beginAtZero: true
       }
     }
-  };
-
-  const data = {
-    labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep"],
-    datasets: [{
-      data: [2200, 3000, 2800, 3900, 3200, 4200],
-      backgroundColor: "#0d9488",
-      borderRadius: 6,
-      barThickness: 40
-    }]
   };
 
   return (
@@ -80,7 +133,11 @@ function EarningsChart({ showBadge = true }) {
         <span className="chart-badge">Last 6 Months</span>
       )}
       <div className="earnings-chart-container">
-        <Bar data={data} options={options} />
+        {loading ? (
+          <div className="chart-loading">Loading chart...</div>
+        ) : (
+          <Bar data={chartData} options={options} />
+        )}
       </div>
     </div>
   );

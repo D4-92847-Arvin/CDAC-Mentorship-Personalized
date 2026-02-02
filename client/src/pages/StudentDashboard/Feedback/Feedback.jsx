@@ -4,8 +4,8 @@ import {
   submitFeedback,
   getStudentFeedbacks,
   getStudentSessions,
-} from "../../../service/studentservice";
-import { getStudentId } from "../../../service/authService";
+} from "../../../services/studentService";
+import { getStudentId } from "../../../services/authService";
 
 const feedbackOptions = [
   { label: "Communication", icon: "👍" },
@@ -45,17 +45,28 @@ const Feedback = () => {
         return;
       }
 
-      // Fetch completed sessions
-      const sessionsResponse = await getStudentSessions(studentId);
-      const sessions = sessionsResponse.data || [];
-      const completed = sessions.filter((s) => s.status === "COMPLETED");
-      setCompletedSessions(completed);
+      // Fetch both sessions and feedbacks
+      const [sessionsResponse, feedbacksResponse] = await Promise.all([
+        getStudentSessions(studentId),
+        getStudentFeedbacks(studentId)
+      ]);
 
-      // Fetch existing feedbacks
-      const feedbacksResponse = await getStudentFeedbacks(studentId);
+      const sessions = sessionsResponse.data || [];
       const feedbacks = feedbacksResponse.data || [];
+
       setStudentFeedbacks(feedbacks);
 
+      // Create a Set of session IDs that already have feedback
+      const sessionsWithFeedback = new Set(
+        feedbacks.map(fb => fb.sessionId).filter(id => id != null)
+      );
+
+      // Filter sessions: Must be COMPLETED and NOT in the feedback set
+      const completedAndAvailable = sessions.filter((s) =>
+        s.status === "COMPLETED" && !sessionsWithFeedback.has(s.sessionId)
+      );
+
+      setCompletedSessions(completedAndAvailable);
       setError(null);
     } catch (err) {
       console.error("Error fetching data:", err);
@@ -181,9 +192,8 @@ const Feedback = () => {
                 {completedSessions.map((session) => (
                   <button
                     key={session.sessionId}
-                    className={`session-option ${
-                      selectedSession === session.sessionId ? "selected" : ""
-                    }`}
+                    className={`session-option ${selectedSession === session.sessionId ? "selected" : ""
+                      }`}
                     onClick={() => handleSessionSelect(session.sessionId)}
                   >
                     <div className="session-option-title">{session.topic}</div>

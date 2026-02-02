@@ -1,27 +1,77 @@
 import "./DashboardHome.css";
-import { useState } from "react";
+import "../../../styles/common.css";
+import { useState, useEffect } from "react";
 import Calendar from 'react-calendar';
 import "react-calendar/dist/Calendar.css";
 import StatCard from '../../../Component/MentorComponents/StatCard/StatCard';
 import SessionItem from '../../../Component/MentorComponents/SessionItem/SessionItem';
 import StudentCard from '../../../Component/MentorComponents/StudentCard/StudentCard';
 import EarningsChart from '../../../Component/MentorComponents/EarningsChart/EarningsChart';
+import ChatModal from '../../../Component/MentorComponents/ChatModal/ChatModal';
+import { getDashboardStats, getTodaySessions, getMyStudents } from '../../../services/mentorService';
+import { handleApiError } from '../../../utils/toast';
+import { getMentorId } from '../../../services/authService';
 
 
 function DashboardHome() {
   const [date, setDate] = useState(new Date());
+  const [loading, setLoading] = useState(true);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [stats, setStats] = useState({
+    activeStudents: 0,
+    totalSessions: 0,
+    totalEarnings: 0,
+    monthlyEarnings: 0,
+    averageRating: 0
+  });
+  const [sessions, setSessions] = useState([]);
+  const [students, setStudents] = useState([]);
   
-  const sessions = [
-    { time: "2:00 PM", student: "Alex Thompson", topic: "Algorithm Design" },
-    { time: "3:30 PM", student: "Emma Wilson", topic: "Career Guidance" },
-    { time: "5:00 PM", student: "Michael Chen", topic: "Code Review" }
-  ];
+  // Get mentor ID from localStorage (set during login)
+  const mentorId = getMentorId();
+  
+  console.log("DashboardHome - Using mentorId:", mentorId);
 
-  const students = [
-    { name: "Alex Thompson", sessions: 12, progress: 85, next: "Oct 8, 2:00 PM" },
-    { name: "Emma Wilson", sessions: 8, progress: 72, next: "Oct 9, 3:30 PM" },
-    { name: "Michael Chen", sessions: 15, progress: 91, next: "Oct 10, 1:00 PM" }
-  ];
+  useEffect(() => {
+    console.log("Current Mentor ID:", mentorId);
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch all data in parallel
+      const [statsData, todaySessionsData, studentsData] = await Promise.all([
+        getDashboardStats(mentorId),
+        getTodaySessions(mentorId),
+        getMyStudents(mentorId)
+      ]);
+
+      if (statsData.success) {
+        setStats({
+          activeStudents: statsData.data.activeStudents || 0,
+          totalSessions: statsData.data.totalSessions || 0,
+          totalEarnings: statsData.data.totalEarnings || 0,
+          monthlyEarnings: statsData.data.thisMonthEarnings || 0,
+          averageRating: statsData.data.averageRating || 0
+        });
+      }
+
+      if (todaySessionsData.success) {
+        setSessions(todaySessionsData.data || []);
+      }
+
+      if (studentsData.success) {
+        setStudents(studentsData.data || []);
+      }
+
+    } catch (error) {
+      handleApiError(error, 'Failed to load dashboard data');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const UsersIcon = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -55,6 +105,20 @@ function DashboardHome() {
     </svg>
   );
 
+  const isPastDate = (selectedDate) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const checkDate = new Date(selectedDate);
+    checkDate.setHours(0, 0, 0, 0);
+    return checkDate < today;
+  };
+
+  const handleDateChange = (newDate) => {
+    if (!isPastDate(newDate)) {
+      setDate(newDate);
+    }
+  };
+
   return (
     <div className="dashboard-home">
       <div className="page-header">
@@ -62,81 +126,124 @@ function DashboardHome() {
         <p className="page-subtitle">Manage your students and sessions</p>
       </div>
 
-      <div className="row">
-        <StatCard 
-          title="Active Students" 
-          value="18" 
-          icon={<UsersIcon />}
-          iconBg="bg-teal"
-        />
-        <StatCard 
-          title="Total Sessions" 
-          value="142" 
-          icon={<CalendarIcon />}
-          iconBg="bg-teal"
-        />
-        <StatCard 
-          title="This Month Earnings" 
-          value="$4,200" 
-          icon={<DollarIcon />}
-          iconBg="bg-green"
-        />
-        <StatCard 
-          title="Average Rating" 
-          value="4.9" 
-          icon={<StarIcon />}
-          iconBg="bg-orange"
-        />
-      </div>
+      {loading ? (
+        <div className="loading-spinner">
+          <div className="spinner"></div>
+          <p>Loading dashboard...</p>
+        </div>
+      ) : (
+        <>
+          <div className="row">
+            <StatCard 
+              title="Active Students" 
+              value={stats.activeStudents.toString()} 
+              icon={<UsersIcon />}
+              iconBg="bg-teal"
+            />
+            <StatCard 
+              title="Total Sessions" 
+              value={stats.totalSessions.toString()} 
+              icon={<CalendarIcon />}
+              iconBg="bg-teal"
+            />
+            <StatCard 
+              title="This Month Earnings" 
+              value={`₹${stats.monthlyEarnings.toLocaleString('en-IN')}`} 
+              icon={<DollarIcon />}
+              iconBg="bg-green"
+            />
+            <StatCard 
+              title="Average Rating" 
+              value={stats.averageRating.toFixed(1)} 
+              icon={<StarIcon />}
+              iconBg="bg-orange"
+            />
+          </div>
 
-      <div className="row mt-4">
-        <div className="col-lg-5 mb-4">
+          <div className="row mt-4">
+            <div className="col-lg-5 mb-4">
+              <div className="section-card">
+                <h5 className="section-title">Availability Calendar</h5>
+                <div className="calendar-wrapper">
+                  <Calendar 
+                    value={date} 
+                    onChange={handleDateChange}
+                    minDate={new Date()}
+                    tileDisabled={({date: tileDate}) => isPastDate(tileDate)}
+                    selectRange={false}
+                  />
+                </div>
+              </div>
+
+              <div className="section-card mt-4">
+                <h5 className="section-title">Today's Sessions</h5>
+                {sessions.length === 0 ? (
+                  <p className="text-muted">No sessions scheduled for today</p>
+                ) : (
+                  sessions.map((session, index) => (
+                    <SessionItem 
+                      key={index} 
+                      time={session.startTime}
+                      student={session.studentName}
+                      topic={session.topic}
+                    />
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="col-lg-7 mb-4">
+              <div className="section-card">
+                <h5 className="section-title">Earnings Overview</h5>
+                <EarningsChart mentorId={mentorId} />
+              </div>
+
+              <div className="section-card earnings-summary-row mt-4">
+                <div className="earnings-mini-card">
+                  <span className="earnings-mini-label">Total Earned</span>
+                  <span className="earnings-mini-value">₹{stats.totalEarnings.toLocaleString('en-IN')}</span>
+                </div>
+                <div className="earnings-mini-card">
+                  <span className="earnings-mini-label">This Month</span>
+                  <span className="earnings-mini-value">₹{stats.monthlyEarnings.toLocaleString('en-IN')}</span>
+                </div>
+                <div className="earnings-mini-card">
+                  <span className="earnings-mini-label">Avg/Session</span>
+                  <span className="earnings-mini-value">
+                    ₹{stats.totalSessions > 0 
+                      ? Math.round(stats.totalEarnings / stats.totalSessions).toLocaleString('en-IN')
+                      : 0}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="section-card">
-            <h5 className="section-title">Availability Calendar</h5>
-            <div className="calendar-wrapper">
-              <Calendar value={date} onChange={setDate} />
-            </div>
+            <h5 className="section-title mb-4">Assigned Students</h5>
+            {students.length === 0 ? (
+              <p className="text-muted">No students assigned yet</p>
+            ) : (
+              <div className="row">
+                {students.map((student, index) => (
+                  <StudentCard 
+                    key={index} 
+                    data={student}
+                    onChatClick={() => setIsChatOpen(true)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
+        </>
+      )}
 
-          <div className="section-card mt-4">
-            <h5 className="section-title">Today's Sessions</h5>
-            {sessions.map(s => (
-              <SessionItem key={s.time} {...s} />
-            ))}
-          </div>
-        </div>
-
-        <div className="col-lg-7 mb-4">
-          <div className="section-card">
-            <h5 className="section-title">Earnings Overview</h5>
-            <EarningsChart />
-          </div>
-
-          <div className="section-card earnings-summary-row mt-4">
-            <div className="earnings-mini-card">
-              <span className="earnings-mini-label">Total Earned</span>
-              <span className="earnings-mini-value">$19,800</span>
-            </div>
-            <div className="earnings-mini-card">
-              <span className="earnings-mini-label">This Month</span>
-              <span className="earnings-mini-value">$4,200</span>
-            </div>
-            <div className="earnings-mini-card">
-              <span className="earnings-mini-label">Avg/Session</span>
-              <span className="earnings-mini-value">$140</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="section-card">
-        <h5 className="section-title mb-4">Assigned Students</h5>
-        <div className="row">
-          {students.map(s => (
-            <StudentCard key={s.name} data={s} />
-          ))}
-        </div>
-      </div>
+      <ChatModal 
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        userId={mentorId}
+        mentorId={mentorId}
+      />
     </div>
   );
 }
