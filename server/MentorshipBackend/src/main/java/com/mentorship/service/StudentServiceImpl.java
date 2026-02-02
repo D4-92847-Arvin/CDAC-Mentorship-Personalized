@@ -216,6 +216,13 @@ public class StudentServiceImpl implements StudentService {
         return mapToStudentDTO(student);
     }
 
+    @Override
+    public StudentDTO getStudentByUserId(Long userId) {
+        Student student = studentRepository.findByUserDetails_UserId(userId)
+                .orElseThrow(() -> new RuntimeException("Student not found for user id: " + userId));
+        return mapToStudentDTO(student);
+    }
+
     public List<StudentDTO> getAllStudents() {
         return studentRepository.findAll()
                 .stream()
@@ -649,4 +656,6 @@ public class StudentServiceImpl implements StudentService {
 
         return sessions;
     }
+
+	
 }

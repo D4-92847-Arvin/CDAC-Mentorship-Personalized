@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../../../Component/Modal.css"; // Using a standard modal CSS
-import { bookSession, deleteSession } from "../../../service/studentService";
-import { getVerifiedMentors } from "../../../service/studentService";
+import { bookSession, deleteSession, getVerifiedMentors } from "../../../service/studentservice";
 import { getStudentId } from "../../../service/authService";
 import { createOrder, verifyPayment } from "../../../service/paymentService";
 import { getAvailabilityForDate } from "../../../service/mentorService";

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { uploadResume } from "../../service/mentorservice";
+import { uploadResume } from "../../service/mentorService";
 import "./Profile.css";
 
 const ResumeUpload = ({ onSuccess }) => {

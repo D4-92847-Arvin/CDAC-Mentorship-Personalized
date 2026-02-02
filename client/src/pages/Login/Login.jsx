@@ -23,7 +23,7 @@ const Login = () => {
       if (redirectRole === "ROLE_STUDENT") {
         navigate("/student-dashboard");
       } else if (redirectRole === "ROLE_MENTOR") {
-        navigate("/mentor/dashboard");
+        navigate("/mentor");
       } else if (redirectRole === "ROLE_ADMIN") {
         navigate("/admin-dashboard");
       }

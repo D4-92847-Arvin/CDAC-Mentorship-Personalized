@@ -1,103 +1,79 @@
 // src/pages/MentorListing/MentorListing.jsx
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "./MentorListing.css";
 import Navbar from "../../Component/Navbar/Navbar";
 import { useNavigate } from "react-router-dom";
-// import { useAuth } from "../../providers/AuthProvider";
-
-import { toast } from "react-toastify";
+import { getPublicMentors } from "../../service/mentorService";
 
 const MentorListing = () => {
-//   const { user } = useAuth(); // if you store logged-in user here
-const user = localStorage.getItem("user"); // temporary fake login check
+  const [mentors, setMentors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const response = await getPublicMentors(search || null);
+        const list = response?.data || [];
+        const mapped = list.map((m) => {
+          const name = m.name || "Mentor";
+          const specialization = m.specialization || "General";
+          const tags = m.expertise
+            ? m.expertise.split(/[,|]/).map((t) => t.trim()).filter(Boolean)
+            : specialization ? [specialization] : [];
+          const avatarFallback = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`;
+          const avatarUrl = m.userId
+            ? `http://localhost:8080/users/image/${m.userId}`
+            : avatarFallback;
 
-  const mentors = [
-    {
-      id: 1,
-      name: "Dr. Ananya Iyer",
-      subject: "Computer Science",
-      rating: 4.9,
-      reviews: 316,
-      sessions: 340,
-      price: 900,
-      desc: "Ex-SDE at a top product company. Helps students master data structures, algorithms, and system design for SDE roles.",
-      tags: ["Algorithms", "Data Structures", "System Design"],
-      avatar: "https://randomuser.me/api/portraits/women/65.jpg",
-    },
-    {
-      id: 2,
-      name: "Prof. Rohan Mehta",
-      subject: "Mathematics (JEE)",
-      rating: 4.8,
-      reviews: 278,
-      sessions: 295,
-      price: 800,
-      desc: "15+ years of experience in JEE Maths. Special focus on calculus, algebra, and problem-solving strategies.",
-      tags: ["Calculus", "Coordinate Geometry", "Algebra"],
-      avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-    },
-    {
-      id: 3,
-      name: "Dr. Kavya Menon",
-      subject: "Physics (NEET & JEE)",
-      rating: 4.9,
-      reviews: 189,
-      sessions: 260,
-      price: 950,
-      desc: "PhD in Physics, known for intuitive explanations of mechanics, optics and modern physics.",
-      tags: ["Mechanics", "Electrodynamics", "Modern Physics"],
-      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-    },
-    {
-      id: 4,
-      name: "Arjun Deshpande",
-      subject: "UPSC General Studies",
-      rating: 4.7,
-      reviews: 211,
-      sessions: 320,
-      price: 1000,
-      desc: "UPSC interview appeared candidate with deep focus on GS2 & GS3, current affairs and answer-writing practice.",
-      tags: ["GS2", "GS3", "Answer Writing"],
-      avatar: "https://randomuser.me/api/portraits/men/41.jpg",
-    },
-    {
-      id: 5,
-      name: "Dr. Nidhi Tripathi",
-      subject: "Biology (NEET)",
-      rating: 4.8,
-      reviews: 245,
-      sessions: 310,
-      price: 850,
-      desc: "MBBS, passionate about simplifying NCERT and PYQs for NEET aspirants.",
-      tags: ["NCERT Focus", "PYQ Strategy", "Diagrams"],
-      avatar: "https://randomuser.me/api/portraits/women/50.jpg",
-    },
-    {
-      id: 6,
-      name: "Sandeep Rao",
-      subject: "CAT & MBA Prep",
-      rating: 4.8,
-      reviews: 198,
-      sessions: 275,
-      price: 1100,
-      desc: "IIM graduate mentoring aspirants in LRDI, VARC, and interview preparation.",
-      tags: ["CAT VARC", "LRDI", "PI Preparation"],
-      avatar: "https://randomuser.me/api/portraits/men/55.jpg",
-    },
-  ];
+          return {
+            id: m.mentorId,
+            name,
+            subject: specialization,
+            rating: 0,
+            reviews: 0,
+            sessions: 0,
+            price: m.ratePerSession ?? 0,
+            desc: m.about || m.experience || m.expertise || "Experienced mentor.",
+            tags,
+            avatar: avatarUrl,
+            avatarFallback,
+            verificationStatus: m.verificationStatus || "PENDING",
+          };
+        });
+        setMentors(mapped);
+      } catch (err) {
+        setError("Unable to load mentors.");
+        setMentors([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const handleBookSession = () => {
-  const user = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+    navigate("/pricing");
+  };
 
-  if (!user) {
-    navigate("/login"); // user must login first
-    return;
-  }
-
-  // If user is logged in → Go to pricing
-  navigate("/pricing");
-};
+  const visibleMentors = useMemo(() => {
+    if (!search) return mentors;
+    const term = search.toLowerCase();
+    return mentors.filter((m) =>
+      [m.name, m.subject, m.desc, ...(m.tags || [])]
+        .filter(Boolean)
+        .some((v) => v.toLowerCase().includes(term))
+    );
+  }, [mentors, search]);
 
 
   return (
@@ -126,6 +102,8 @@ const user = localStorage.getItem("user"); // temporary fake login check
                     type="text"
                     className="form-control search-input"
                     placeholder="Search by name, exam, specialization..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
                   />
                 </div>
               </div>
@@ -144,35 +122,43 @@ const user = localStorage.getItem("user"); // temporary fake login check
           </div>
 
           <p className="showing-text">
-            Showing {mentors.length} mentors
+            {loading ? "Loading mentors..." : `Showing ${visibleMentors.length} mentors`}
           </p>
+
+          {error && (
+            <div className="alert alert-warning" role="alert">
+              {error}
+            </div>
+          )}
 
           {/* Mentor Cards */}
           <div className="row g-4">
-            {mentors.map((m) => (
+            {visibleMentors.map((m) => (
               <div className="col-md-6 col-lg-4" key={m.id}>
                 <div className="mentor-card">
-                  {/* Top part: avatar + name */}
-                  <div className="d-flex justify-content-between">
-                    <div className="d-flex">
+                  <div className="mentor-card-header">
+                    <span className={`badge-verified ${m.verificationStatus !== "VERIFIED" ? "badge-pending" : ""}`}>
+                      {m.verificationStatus === "VERIFIED" ? "Verified" : "Pending"}
+                    </span>
+                    <div className="mentor-avatar-wrap">
                       <img
                         src={m.avatar}
                         alt={m.name}
-                        className="mentor-avatar me-3"
+                        className="mentor-avatar"
+                        onError={(e) => {
+                          e.currentTarget.src = m.avatarFallback;
+                        }}
                       />
-                      <div>
-                        <h5 className="mentor-name">{m.name}</h5>
-                        <p className="mentor-subject">{m.subject}</p>
-                        <div className="mentor-rating">
-                          <span className="star">★</span>
-                          <span className="rating-score">{m.rating}</span>
-                          <span className="rating-details">
-                            ({m.reviews}) · {m.sessions} sessions
-                          </span>
-                        </div>
-                      </div>
                     </div>
-                    <span className="badge-verified">Verified</span>
+                    <h5 className="mentor-name">{m.name}</h5>
+                    <p className="mentor-subject">{m.subject}</p>
+                    <div className="mentor-rating">
+                      <span className="star">★</span>
+                      <span className="rating-score">{m.rating}</span>
+                      <span className="rating-details">
+                        ({m.reviews}) · {m.sessions} sessions
+                      </span>
+                    </div>
                   </div>
 
                   {/* Description */}
@@ -188,7 +174,7 @@ const user = localStorage.getItem("user"); // temporary fake login check
                   </div>
 
                   {/* Price + button */}
-                  <div className="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                  <div className="mentor-footer">
                     <div className="mentor-price">₹{m.price}/hr</div>
                     <button
                       className="btn btn-sm mentor-book-btn"

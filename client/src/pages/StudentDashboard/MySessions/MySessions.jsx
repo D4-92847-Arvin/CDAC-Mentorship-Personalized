@@ -3,7 +3,7 @@ import "./MySessions.css";
 import {
   getStudentSessions,
   cancelSession,
-} from "../../../service/studentService";
+} from "../../../service/studentservice";
 import { getStudentId } from "../../../service/authService";
 import ScheduleSessionModal from "./ScheduleSessionModal";
 

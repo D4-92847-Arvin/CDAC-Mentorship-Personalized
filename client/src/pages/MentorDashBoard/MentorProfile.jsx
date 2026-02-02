@@ -5,7 +5,7 @@ import ResumeUpload from "../../Component/Profile/ResumeUpload";
 import ProfileImageUploadModal from "../../Component/Profile/ProfileImageUploadModal";
 import ProfileSetupBanner from "../../Component/Profile/ProfileSetupBanner";
 import EditMentorProfileModal from "../../Component/Profile/EditMentorProfileModal";
-import { getMyMentorProfile } from "../../service/mentorservice";
+import { getMyMentorProfile } from "../../service/mentorService";
 import { useAuth } from "../../API/AuthContext";
 
 const MentorProfile = () => {
@@ -14,11 +14,13 @@ const MentorProfile = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [imageRefresh, setImageRefresh] = useState(0);
-  const { user: authUser } = useAuth();
+  const { user: authUser, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    load();
-  }, [authUser]);
+    if (isAuthenticated) {
+      load();
+    }
+  }, [authUser, isAuthenticated]);
 
   const load = async () => {
     setLoading(true);
@@ -35,7 +37,7 @@ const MentorProfile = () => {
         education: dto.highestEducation || "",
         specialization: dto.specialization || "",
         experience: dto.experience || "",
-        bio: dto.about || dto.professionalBio || "",
+        bio: dto.professionalBio || dto.about || "",
         verificationStatus: dto.verificationStatus || "PENDING",
       };
       setMentor(mapped);

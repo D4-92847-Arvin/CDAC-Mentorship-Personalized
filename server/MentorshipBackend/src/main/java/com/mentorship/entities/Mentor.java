@@ -78,7 +78,7 @@ public class Mentor extends BaseEntity{
     private String organization;
 	
 	@Lob
-    @Column(name = "professional_bio", nullable = false)
+    @Column(name = "professional_bio", nullable = false,columnDefinition = "TEXT")
     private String professionalBio;
 	
 	/*

@@ -23,6 +23,25 @@ export const getStudentId = () => {
   return studentId ? parseInt(studentId) : null;
 };
 
+// Get mentor ID from localStorage (from JWT token)
+export const getMentorId = () => {
+  const token = localStorage.getItem("token");
+  const mentorId = localStorage.getItem("mentorId");
+  
+  if (!mentorId && token) {
+    // Try to decode JWT if mentorId not stored
+    try {
+      const decoded = parseJwt(token);
+      return decoded?.mentorId || decoded?.userId || null;
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      return null;
+    }
+  }
+  
+  return mentorId ? parseInt(mentorId) : null;
+};
+
 // Parse JWT token
 const parseJwt = (token) => {
   try {

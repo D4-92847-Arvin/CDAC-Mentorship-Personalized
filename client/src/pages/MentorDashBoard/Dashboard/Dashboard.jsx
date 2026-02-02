@@ -16,6 +16,7 @@ function Dashboard() {
       <main className='main-content'>
         <Routes>
           <Route index element={<DashboardHome/>}/>
+          <Route path='dashboard' element={<DashboardHome/>}/>
           <Route path='availability' element={<Availability/>}/>
           <Route path='students' element={<MyStudents/>}/>
           <Route path='feedback' element={<Feedback/>}/>
