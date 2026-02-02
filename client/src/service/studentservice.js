@@ -1,51 +1,56 @@
-import axios from "axios";
+import api from "../API/api";
 
 const API_URL = "http://localhost:8080/api/student";
 
 // Get student dashboard stats
 export const getStudentDashboard = (studentId) => {
-  return axios.get(`${API_URL}/${studentId}/dashboard`);
+  return api.get(`/api/student/${studentId}/dashboard`);
 };
 
 // Get all sessions for a student
 export const getStudentSessions = (studentId) => {
-  return axios.get(`${API_URL}/${studentId}/sessions`);
+  return api.get(`/api/student/${studentId}/sessions`);
 };
 
 // Get student details
 export const getStudentDetails = (studentId) => {
-  return axios.get(`${API_URL}/${studentId}`);
+  return api.get(`/api/student/${studentId}`);
+};
+
+// Get student details by user ID
+export const getStudentDetailsByUserId = (userId) => {
+  return api.get(`/api/student/user/${userId}`);
 };
 
 // Book a session
 export const bookSession = (studentId, sessionData) => {
-  return axios.post(`${API_URL}/${studentId}/sessions`, sessionData);
+  return api.post(`/api/student/${studentId}/sessions`, sessionData);
 };
 
 // Cancel a session
 export const cancelSession = (sessionId) => {
-  return axios.patch(`${API_URL}/sessions/${sessionId}/cancel`);
+  return api.patch(`/api/student/sessions/${sessionId}/cancel`);
 };
 
 // Get verified mentors
 export const getVerifiedMentors = (domain = null) => {
   const params = domain ? { domain } : {};
-  return axios.get(`${API_URL}/mentors`, { params });
+  return api.get(`/api/student/mentors`, { params });
 };
 
 // Get mentor details by ID
 export const getMentorDetails = (mentorId) => {
-  return axios.get(`${API_URL}/mentor/${mentorId}`);
+  return api.get(`/api/student/mentor/${mentorId}`);
 };
 
 // Submit feedback
 export const submitFeedback = (studentId, feedbackData) => {
-  return axios.post(`${API_URL}/${studentId}/feedback`, feedbackData);
+  return api.post(`/api/student/${studentId}/feedback`, feedbackData);
 };
 
 // Get student feedbacks
 export const getStudentFeedbacks = (studentId) => {
-  return axios.get(`${API_URL}/${studentId}/feedback`);
+  return api.get(`/api/student/${studentId}/feedback`);
 };
 
 // Get first assigned mentor from sessions
@@ -65,5 +70,5 @@ export const getAssignedMentor = (studentId) => {
 
 // Update student profile
 export const updateStudentProfile = (studentId, profileData) => {
-  return axios.put(`${API_URL}/${studentId}`, profileData);
+  return api.put(`/api/student/${studentId}`, profileData);
 };

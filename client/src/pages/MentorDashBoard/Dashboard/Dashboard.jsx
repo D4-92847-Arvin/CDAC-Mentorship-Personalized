@@ -6,6 +6,7 @@ import Availability from '../Availability/Availability';
 import MyStudents from '../MyStudents/MyStudents';
 import Feedback from '../Feedback/Feedback';
 import Earnings from '../Earnings/Earnings';
+import MentorProfile from '../MentorProfile';
 import "./Dashboard.css";
 
 function Dashboard() {
@@ -19,6 +20,7 @@ function Dashboard() {
           <Route path='students' element={<MyStudents/>}/>
           <Route path='feedback' element={<Feedback/>}/>
           <Route path='earnings' element={<Earnings/>}/>
+          <Route path='profile' element={<MentorProfile/>}/>
         </Routes>
       </main>
     </div>

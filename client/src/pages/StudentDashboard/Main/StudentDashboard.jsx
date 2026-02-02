@@ -7,12 +7,14 @@ import MCQPractice from "../MCQPractice/MCQPractice";
 import Subscriptions from "../Subscriptions/Subscriptions";
 import Feedback from "../Feedback/Feedback";
 import EditProfileModal from "./EditProfileModal";
+import StudentProfile from "../StudentProfile";
 import { getStudentDashboard } from "../../../service/studentservice";
 import { getStudentId, clearStudentAuth } from "../../../service/authService";
 import { useDarkMode } from "../../../context/DarkModeContext";
 
 const sidebarItems = [
   { label: "Dashboard", icon: "🏠" },
+  { label: "Profile", icon: "👤" },
   { label: "My Mentor", icon: "👩‍🏫" },
   { label: "My Sessions", icon: "📅" },
   { label: "MCQ Practice", icon: "📝" },
@@ -198,6 +200,7 @@ const StudentDashboard = () => {
           </>
         )}
 
+        {activeTab === "Profile" && <StudentProfile />}
         {activeTab === "My Mentor" && <MyMentor />}
         {activeTab === "My Sessions" && <MySessions />}
         {activeTab === "MCQ Practice" && (
