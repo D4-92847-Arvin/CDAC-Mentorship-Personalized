@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.mentorship.custom_exceptions.ApiException;
+import com.mentorship.dtos.AdminSignupRequest;
 import com.mentorship.dtos.ApiResponse;
 import com.mentorship.dtos.MentorSignupRequest;
 import com.mentorship.dtos.StudentSignupRequest;
@@ -101,6 +102,12 @@ public class AuthServiceImpl implements AuthService{
 	        mentor.setRatePerSession(dto.getRatePerSession());
 	        mentor.setDiscountPercent(dto.getDiscountPercent());
 	        mentor.setVerificationStatus(VerificationStatus.PENDING);
+	        mentor.setHighestEducation(dto.getHighestEducation());
+	        mentor.setCurrentPosition(dto.getCurrentPosition());
+	        mentor.setOrganization(dto.getOrganization());
+	        mentor.setProfessionalBio(dto.getProfessionalBio());
+	        mentor.setLinkedinUrl(dto.getLinkedinUrl());
+	        mentor.setPortfolioUrl(dto.getPortfolioUrl());
 	        mentor.setVerifiedBy(null);
 	        
 	        log.info("Created mentor entity with specialization: {}, experience: {}, rate: {}", 
@@ -118,6 +125,43 @@ public class AuthServiceImpl implements AuthService{
 		} catch (Exception e) {
 			log.error("Exception during mentor registration for email: {}", dto.getEmail(), e);
 			throw new ApiException("Mentor registration failed: " + e.getMessage());
+		}
+	}
+
+	@Override
+	public ApiResponse registerAdmin(AdminSignupRequest dto) {
+		log.info("Registering admin with email: {}", dto.getEmail());
+		try {
+			// Check if email already exists
+			if (userRepository.existsByEmail(dto.getEmail())) {
+				log.warn("Admin registration failed - email already exists: {}", dto.getEmail());
+				throw new ApiException("Email already exists");
+			}
+			
+			// Create User entity with ADMIN role
+			User admin = new User();
+			admin.setFirstName(dto.getFirstName());
+			admin.setLastName(dto.getLastName());
+			admin.setEmail(dto.getEmail());
+			admin.setPassword(passwordEncoder.encode(dto.getPassword()));
+			admin.setDob(dto.getDob());
+			admin.setAddress(dto.getAddress());
+			admin.setPhoneNo(dto.getPhoneNo() != null && !dto.getPhoneNo().isEmpty() 
+				? dto.getPhoneNo() : null);
+			admin.setUserRole(UserRole.ADMIN);
+			
+			// Save directly to userRepository
+			User savedAdmin = userRepository.save(admin);
+			log.info("Admin registered successfully with email: {}, userId: {}", 
+				dto.getEmail(), savedAdmin.getUserId());
+			
+			return new ApiResponse("Admin registered successfully!", null);
+		} catch (ApiException e) {
+			log.error("ApiException during admin registration: {}", e.getMessage());
+			throw e;
+		} catch (Exception e) {
+			log.error("Exception during admin registration for email: {}", dto.getEmail(), e);
+			throw new ApiException("Admin registration failed: " + e.getMessage());
 		}
 	}
 }
