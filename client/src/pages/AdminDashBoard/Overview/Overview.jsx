@@ -11,6 +11,11 @@ import RetentionChurn from "../RetentionChurn/RetentionChurn";
 
 const Overview = () => {
   const [activeTab, setActiveTab] = useState("overview");
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const handleDataRefresh = () => {
+    setRefreshTrigger((prev) => prev + 1);
+  };
 
   const chartData = useMemo(
     () => [
@@ -21,7 +26,7 @@ const Overview = () => {
       { month: "Aug", students: 460, mentors: 42 },
       { month: "Sep", students: 580, mentors: 50 },
     ],
-    []
+    [],
   );
 
   const activities = useMemo(
@@ -48,17 +53,21 @@ const Overview = () => {
         bg: "#fd7e14",
       },
     ],
-    []
+    [],
   );
 
   const renderContent = () => {
     switch (activeTab) {
       case "overview":
         return (
-          <OverviewContent chartData={chartData} activities={activities} />
+          <OverviewContent
+            chartData={chartData}
+            activities={activities}
+            refreshTrigger={refreshTrigger}
+          />
         );
       case "verification":
-        return <VerificationContent />;
+        return <VerificationContent onDataRefresh={handleDataRefresh} />;
       case "users":
         return <UserManagementContent />;
       case "revenue":
@@ -69,7 +78,11 @@ const Overview = () => {
         return <RetentionChurn />;
       default:
         return (
-          <OverviewContent chartData={chartData} activities={activities} />
+          <OverviewContent
+            chartData={chartData}
+            activities={activities}
+            refreshTrigger={refreshTrigger}
+          />
         );
     }
   };

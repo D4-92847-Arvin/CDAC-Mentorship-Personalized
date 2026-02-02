@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./RetentionChurn.css";
+import { adminDashboardService } from "../../../service/adminDashboardService";
 
 const ProgressBar = ({ percent }) => (
   <div className="rc-progress">
@@ -8,6 +9,67 @@ const ProgressBar = ({ percent }) => (
 );
 
 export const RetentionChurn = () => {
+  const [metrics, setMetrics] = useState(null);
+  const [churnReasons, setChurnReasons] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchRetentionData();
+  }, []);
+
+  const fetchRetentionData = async () => {
+    try {
+      setLoading(true);
+
+      let metricsData = null;
+      let churnReasonsData = [];
+
+      try {
+        metricsData = await adminDashboardService.getRetentionChurnMetrics();
+      } catch (err) {
+        console.error("Error fetching retention metrics:", err);
+      }
+
+      try {
+        churnReasonsData = await adminDashboardService.getChurnReasons();
+      } catch (err) {
+        console.error("Error fetching churn reasons:", err);
+      }
+
+      setMetrics(metricsData);
+      setChurnReasons(churnReasonsData || []);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching retention data:", err);
+      setError("Failed to load retention data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center py-5">
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback data if API returns null
+  const displayMetrics = metrics || {
+    monthlyActiveUsers: 594,
+    activeUsersGrowthPercent: 8,
+    retentionRate: 78,
+    retentionGrowthPercent: 3,
+    churnRate: 22,
+    churnGrowthPercent: -2,
+    avgLifetimeDays: 127,
+    lifetimeGrowthPercent: 12,
+  };
+
   const retentionData = [
     { period: "Week 1", retained: 95, churned: 5 },
     { period: "Week 2", retained: 88, churned: 12 },
@@ -17,13 +79,16 @@ export const RetentionChurn = () => {
     { period: "Month 3", retained: 68, churned: 32 },
   ];
 
-  const churnReasons = [
+  const fallbackChurnReasons = [
     { reason: "Lack of time", count: 42, percentage: 35 },
     { reason: "Found alternative", count: 28, percentage: 23 },
     { reason: "Cost concerns", count: 24, percentage: 20 },
     { reason: "Technical issues", count: 15, percentage: 12 },
     { reason: "Other", count: 12, percentage: 10 },
   ];
+
+  const displayChurnReasons =
+    churnReasons.length > 0 ? churnReasons : fallbackChurnReasons;
 
   const cohortAnalysis = [
     { cohort: "Jan 2024", month1: 100, month2: 85, month3: 72, month4: 68 },
@@ -41,37 +106,61 @@ export const RetentionChurn = () => {
         </p>
       </div>
 
+      {error && (
+        <div
+          className="alert alert-warning alert-dismissible fade show"
+          role="alert"
+        >
+          {error}
+          <button
+            type="button"
+            className="btn-close"
+            onClick={() => setError("")}
+          ></button>
+        </div>
+      )}
+
       {/* Key metrics */}
       <div className="row g-3 mb-4">
         <div className="col-md-3">
           <div className="rc-card">
             <div className="rc-card__title">Monthly Active Users</div>
-            <div className="rc-card__value">594</div>
-            <div className="rc-card__badge rc-positive">+8%</div>
+            <div className="rc-card__value">
+              {(displayMetrics.monthlyActiveUsers || 0).toFixed(2)}
+            </div>
+            <div className="rc-card__badge rc-positive">
+              +{(displayMetrics.activeUsersGrowthPercent || 0).toFixed(2)}%
+            </div>
           </div>
         </div>
 
         <div className="col-md-3">
           <div className="rc-card">
             <div className="rc-card__title">Retention Rate</div>
-            <div className="rc-card__value">78%</div>
-            <div className="rc-card__badge rc-positive">+3%</div>
+            <div className="rc-card__value">
+              {(displayMetrics.retentionRate || 0).toFixed(2)}%
+            </div>
           </div>
         </div>
 
         <div className="col-md-3">
           <div className="rc-card">
             <div className="rc-card__title">Churn Rate</div>
-            <div className="rc-card__value">22%</div>
-            <div className="rc-card__badge rc-negative">-2%</div>
+            <div className="rc-card__value">
+              {(displayMetrics.churnRate || 0).toFixed(2)}%
+            </div>
           </div>
         </div>
 
         <div className="col-md-3">
           <div className="rc-card">
             <div className="rc-card__title">Avg. Lifetime (Days)</div>
-            <div className="rc-card__value">127</div>
-            <div className="rc-card__badge rc-positive">+12</div>
+            <div className="rc-card__value">
+              {displayMetrics.avgLifetimeDays}
+            </div>
+            <div className="rc-card__badge rc-positive">
+              +{displayMetrics.lifetimeGrowthPercent}
+            </div>
           </div>
         </div>
       </div>
@@ -177,15 +266,17 @@ export const RetentionChurn = () => {
             <div className="card-body">
               <h5 className="card-heading mb-3">Churn Reasons</h5>
 
-              {churnReasons.map((item, idx) => (
+              {displayChurnReasons.map((item, idx) => (
                 <div key={idx} className="rc-churn-reason mb-3">
                   <div className="d-flex justify-content-between align-items-center mb-2">
-                    <span className="fw-semibold">{item.reason}</span>
+                    <span className="fw-semibold">
+                      {item.reason || item.churnReason}
+                    </span>
                     <span className="text-muted small">
-                      {item.count} ({item.percentage}%)
+                      {item.count || 0} ({item.percentage || 0}%)
                     </span>
                   </div>
-                  <ProgressBar percent={item.percentage} />
+                  <ProgressBar percent={item.percentage || 0} />
                 </div>
               ))}
             </div>
