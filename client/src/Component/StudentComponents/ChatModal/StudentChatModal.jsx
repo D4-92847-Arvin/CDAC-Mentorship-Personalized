@@ -1,19 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
-import './StudentChatModal.css';
-import { 
-  sendMessageToMentor, 
-  getConversationWithMentor, 
+import React, { useState, useEffect, useRef } from "react";
+import "./StudentChatModal.css";
+import {
+  sendMessageToMentor,
+  getConversationWithMentor,
   markMessagesAsReadByStudent,
   getStudentConversations,
-  getVerifiedMentors 
-} from '../../../services/studentService';
+  getVerifiedMentors,
+} from "../../../service/studentService";
 
 const StudentChatModal = ({ isOpen, onClose, studentId }) => {
   const [conversations, setConversations] = useState([]);
   const [allMentors, setAllMentors] = useState([]);
   const [selectedMentor, setSelectedMentor] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState('');
+  const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const pollingInterval = useRef(null);
@@ -23,20 +23,20 @@ const StudentChatModal = ({ isOpen, onClose, studentId }) => {
 
   // Scroll to bottom of messages
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   // Load conversations on mount
   useEffect(() => {
     if (isOpen && studentId) {
       loadConversations();
-      
+
       // Start polling conversation list every 5 seconds to catch new messages from mentors
       conversationPollingInterval.current = setInterval(() => {
         loadConversations();
       }, 5000);
     }
-    
+
     return () => {
       if (conversationPollingInterval.current) {
         clearInterval(conversationPollingInterval.current);
@@ -48,7 +48,7 @@ const StudentChatModal = ({ isOpen, onClose, studentId }) => {
   useEffect(() => {
     if (selectedMentor) {
       loadMessages();
-      
+
       // Start polling every 3 seconds
       pollingInterval.current = setInterval(() => {
         loadMessages(true);
@@ -70,54 +70,56 @@ const StudentChatModal = ({ isOpen, onClose, studentId }) => {
   const loadConversations = async () => {
     try {
       setLoading(true);
-      
-      console.log("StudentChatModal.loadConversations - Using studentId:", studentId);
-      
+
+      console.log(
+        "StudentChatModal.loadConversations - Using studentId:",
+        studentId,
+      );
+
       if (!studentId) {
         console.error("StudentChatModal - studentId is not set!");
         setLoading(false);
         return;
       }
-      
+
       // Load all verified mentors and existing conversations in parallel
       const [mentorsResponse, conversationsResponse] = await Promise.all([
         getVerifiedMentors(studentId),
-        getStudentConversations(studentId)
+        getStudentConversations(studentId),
       ]);
-      
+
       console.log("Mentors response:", mentorsResponse);
       console.log("Conversations response:", conversationsResponse);
-      
+
       // Get all mentors
       const mentors = mentorsResponse.data || [];
       setAllMentors(mentors);
-      
+
       // Get existing conversations
       const existingConversations = conversationsResponse?.data?.data || [];
-      
+
       // Create a map of mentors with conversation data
       const conversationMap = new Map();
-      existingConversations.forEach(conv => {
+      existingConversations.forEach((conv) => {
         conversationMap.set(conv.mentorId, conv);
       });
-      
+
       // Merge all mentors with conversation data
-      const mergedConversations = mentors.map(mentor => {
+      const mergedConversations = mentors.map((mentor) => {
         const existingConv = conversationMap.get(mentor.mentorId);
         return {
           mentorId: mentor.mentorId,
           mentorName: mentor.name,
-          lastMessage: existingConv?.lastMessage || 'No messages yet',
-          lastMessageTime: existingConv?.lastMessageTime || '',
-          unreadCount: existingConv?.unreadCount || 0
+          lastMessage: existingConv?.lastMessage || "No messages yet",
+          lastMessageTime: existingConv?.lastMessageTime || "",
+          unreadCount: existingConv?.unreadCount || 0,
         };
       });
-      
+
       console.log("Merged conversations:", mergedConversations);
       setConversations(mergedConversations);
-      
     } catch (error) {
-      console.error('Error loading conversations:', error);
+      console.error("Error loading conversations:", error);
     } finally {
       setLoading(false);
     }
@@ -125,32 +127,38 @@ const StudentChatModal = ({ isOpen, onClose, studentId }) => {
 
   const loadMessages = async (silent = false) => {
     if (!selectedMentor) return;
-    
+
     try {
       if (!silent) setLoading(true);
-      
-      const response = await getConversationWithMentor(studentId, selectedMentor.mentorId);
+
+      const response = await getConversationWithMentor(
+        studentId,
+        selectedMentor.mentorId,
+      );
       console.log("Messages response:", response);
-      
+
       const fetchedMessages = response.data?.data || [];
-      
+
       // Check for new messages (only if not initial load)
-      if (silent && messages.length > 0 && fetchedMessages.length > messages.length) {
+      if (
+        silent &&
+        messages.length > 0 &&
+        fetchedMessages.length > messages.length
+      ) {
         // New message received - show notification and refresh conversation list
         console.log("📩 New message received from", selectedMentor.mentorName);
         loadConversations(); // Refresh to update last message
         // You can add a toast notification here if you have a notification library
       }
-      
+
       setMessages(fetchedMessages);
-      
+
       // Mark messages as read ONLY on initial load (not during polling)
       if (!silent && fetchedMessages.length > 0) {
         await markMessagesAsReadByStudent(studentId, selectedMentor.mentorId);
       }
-      
     } catch (error) {
-      console.error('Error loading messages:', error);
+      console.error("Error loading messages:", error);
     } finally {
       if (!silent) setLoading(false);
     }
@@ -164,39 +172,42 @@ const StudentChatModal = ({ isOpen, onClose, studentId }) => {
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    
+
     if (!newMessage.trim() || !selectedMentor) return;
-    
+
     try {
       const response = await sendMessageToMentor(
         studentId,
         selectedMentor.mentorId,
-        newMessage.trim()
+        newMessage.trim(),
       );
-      
+
       console.log("Message sent:", response);
-      
+
       // Clear input
-      setNewMessage('');
-      
+      setNewMessage("");
+
       // Reload messages immediately
       await loadMessages(true);
-      
+
       // Don't mark messages as read after sending - only mark when viewing/opening
       // This allows the mentor to see the unread count for student messages
-      
+
       // Update last message in conversation list
-      setConversations(prev =>
-        prev.map(conv =>
+      setConversations((prev) =>
+        prev.map((conv) =>
           conv.mentorId === selectedMentor.mentorId
-            ? { ...conv, lastMessage: newMessage.trim(), lastMessageTime: new Date().toISOString() }
-            : conv
-        )
+            ? {
+                ...conv,
+                lastMessage: newMessage.trim(),
+                lastMessageTime: new Date().toISOString(),
+              }
+            : conv,
+        ),
       );
-      
     } catch (error) {
-      console.error('Error sending message:', error);
-      alert('Failed to send message. Please try again.');
+      console.error("Error sending message:", error);
+      alert("Failed to send message. Please try again.");
     }
   };
 
@@ -209,11 +220,16 @@ const StudentChatModal = ({ isOpen, onClose, studentId }) => {
 
   return (
     <div className="chat-modal-overlay" onClick={onClose}>
-      <div className="chat-modal-container" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="chat-modal-container"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="chat-modal-header">
           <h2>💬 Chat with Mentors</h2>
-          <button className="chat-close-btn" onClick={onClose}>×</button>
+          <button className="chat-close-btn" onClick={onClose}>
+            ×
+          </button>
         </div>
 
         {/* Content */}
@@ -225,7 +241,10 @@ const StudentChatModal = ({ isOpen, onClose, studentId }) => {
                 <div className="chat-loading">Loading mentors...</div>
               ) : conversations.length === 0 ? (
                 <div className="no-conversations">
-                  <p>No mentors found. Browse and book sessions with mentors to start chatting!</p>
+                  <p>
+                    No mentors found. Browse and book sessions with mentors to
+                    start chatting!
+                  </p>
                 </div>
               ) : (
                 <>
@@ -235,17 +254,21 @@ const StudentChatModal = ({ isOpen, onClose, studentId }) => {
                   {conversations.map((conv) => (
                     <div
                       key={conv.mentorId}
-                      className={`conversation-item ${conv.unreadCount > 0 ? 'has-unread' : ''}`}
+                      className={`conversation-item ${conv.unreadCount > 0 ? "has-unread" : ""}`}
                       onClick={() => handleSelectMentor(conv)}
                     >
                       <div className="conversation-avatar">
                         {conv.mentorName.charAt(0)}
                       </div>
                       <div className="conversation-info">
-                        <div className={`conversation-name ${conv.unreadCount > 0 ? 'unread-name' : ''}`}>
+                        <div
+                          className={`conversation-name ${conv.unreadCount > 0 ? "unread-name" : ""}`}
+                        >
                           {conv.mentorName}
                         </div>
-                        <div className={`conversation-last-message ${conv.unreadCount > 0 ? 'unread-message' : ''}`}>
+                        <div
+                          className={`conversation-last-message ${conv.unreadCount > 0 ? "unread-message" : ""}`}
+                        >
                           {conv.lastMessage}
                         </div>
                       </div>
@@ -274,7 +297,9 @@ const StudentChatModal = ({ isOpen, onClose, studentId }) => {
                     {selectedMentor.mentorName.charAt(0)}
                   </div>
                   <div>
-                    <div className="chat-mentor-name">{selectedMentor.mentorName}</div>
+                    <div className="chat-mentor-name">
+                      {selectedMentor.mentorName}
+                    </div>
                     <div className="chat-mentor-status">Mentor</div>
                   </div>
                 </div>
@@ -293,21 +318,22 @@ const StudentChatModal = ({ isOpen, onClose, studentId }) => {
                     <div
                       key={index}
                       className={`message ${
-                        message.senderType === 'STUDENT' ? 'sent' : 'received'
-                      } ${message.senderType !== 'STUDENT' && !message.isRead ? 'unread' : ''}`}
+                        message.senderType === "STUDENT" ? "sent" : "received"
+                      } ${message.senderType !== "STUDENT" && !message.isRead ? "unread" : ""}`}
                     >
                       <div className="message-content">
                         {message.content}
-                        {message.senderType !== 'STUDENT' && !message.isRead && (
-                          <span className="new-message-badge"> • NEW</span>
-                        )}
+                        {message.senderType !== "STUDENT" &&
+                          !message.isRead && (
+                            <span className="new-message-badge"> • NEW</span>
+                          )}
                       </div>
                       <div className="message-time">
                         {new Date(message.timestamp).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit'
+                          hour: "2-digit",
+                          minute: "2-digit",
                         })}
-                        {message.senderType !== 'STUDENT' && message.isRead && (
+                        {message.senderType !== "STUDENT" && message.isRead && (
                           <span className="read-indicator"> ✓✓</span>
                         )}
                       </div>
@@ -318,7 +344,10 @@ const StudentChatModal = ({ isOpen, onClose, studentId }) => {
               </div>
 
               {/* Message Input */}
-              <form className="message-input-container" onSubmit={handleSendMessage}>
+              <form
+                className="message-input-container"
+                onSubmit={handleSendMessage}
+              >
                 <input
                   type="text"
                   placeholder="Type a message..."

@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 import "./Feedback.css";
 import "../../../styles/common.css";
-import { getFeedback, getAverageRating } from '../../../services/mentorService';
-import { handleApiError } from '../../../utils/toast';
-import { getMentorId } from '../../../services/authService';
+import { getFeedback, getAverageRating } from "../../../service/mentorService";
+import { handleApiError } from "../../../utils/toast";
+import { getMentorId } from "../../../service/authService";
 
 function Feedback() {
   const [feedback, setFeedback] = useState([]);
   const [averageRating, setAverageRating] = useState(0);
   const [loading, setLoading] = useState(true);
-  
+
   // Get mentor ID from localStorage (set during login)
   const mentorId = getMentorId();
 
@@ -22,7 +22,7 @@ function Feedback() {
       setLoading(true);
       const [feedbackResponse, ratingResponse] = await Promise.all([
         getFeedback(mentorId),
-        getAverageRating(mentorId)
+        getAverageRating(mentorId),
       ]);
 
       if (feedbackResponse.success) {
@@ -33,15 +33,15 @@ function Feedback() {
         setAverageRating(ratingResponse.data);
       }
     } catch (error) {
-      handleApiError(error, 'Failed to load feedback');
+      handleApiError(error, "Failed to load feedback");
     } finally {
       setLoading(false);
     }
   };
 
   const getInitials = (name) => {
-    if (!name) return '??';
-    const parts = name.split(' ');
+    if (!name) return "??";
+    const parts = name.split(" ");
     if (parts.length >= 2) {
       return parts[0][0] + parts[1][0];
     }
@@ -49,12 +49,12 @@ function Feedback() {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return '';
+    if (!dateString) return "";
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric', 
-      year: 'numeric' 
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
   };
 
@@ -82,15 +82,24 @@ function Feedback() {
             <div className="feedback-card" key={i}>
               <div className="feedback-header">
                 <div className="feedback-user">
-                  <div className="feedback-avatar">{getInitials(f.studentName)}</div>
+                  <div className="feedback-avatar">
+                    {getInitials(f.studentName)}
+                  </div>
                   <div className="feedback-user-info">
                     <div className="feedback-name">{f.studentName}</div>
-                    <div className="feedback-date">{formatDate(f.feedbackDate)}</div>
+                    <div className="feedback-date">
+                      {formatDate(f.feedbackDate)}
+                    </div>
                   </div>
                 </div>
                 <div className="feedback-rating">
                   {[...Array(5)].map((_, idx) => (
-                    <span key={idx} className={`star ${idx < f.rating ? 'filled' : ''}`}>★</span>
+                    <span
+                      key={idx}
+                      className={`star ${idx < f.rating ? "filled" : ""}`}
+                    >
+                      ★
+                    </span>
                   ))}
                 </div>
               </div>

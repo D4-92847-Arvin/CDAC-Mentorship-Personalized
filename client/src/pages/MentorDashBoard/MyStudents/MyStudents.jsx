@@ -3,18 +3,18 @@ import "./MyStudents.css";
 import "../../../styles/common.css";
 import StudentCard from "../../../Component/MentorComponents/StudentCard/StudentCard";
 import ChatModal from "../../../Component/MentorComponents/ChatModal/ChatModal";
-import { getMyStudents } from '../../../services/mentorService';
-import { handleApiError } from '../../../utils/toast';
-import { getMentorId } from '../../../services/authService';
+import { getMyStudents } from "../../../service/mentorService";
+import { handleApiError } from "../../../utils/toast";
+import { getMentorId } from "../../../service/authService";
 
 function MyStudents() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  
+
   // Get mentor ID from localStorage (set during login)
   const mentorId = getMentorId();
-  
+
   console.log("MyStudents - Using mentorId:", mentorId);
 
   useEffect(() => {
@@ -25,12 +25,12 @@ function MyStudents() {
     try {
       setLoading(true);
       const response = await getMyStudents(mentorId);
-      
+
       if (response.success) {
         setStudents(response.data || []);
       }
     } catch (error) {
-      handleApiError(error, 'Failed to load students');
+      handleApiError(error, "Failed to load students");
     } finally {
       setLoading(false);
     }
@@ -42,7 +42,7 @@ function MyStudents() {
         <h1 className="page-title">My Students</h1>
         <p className="page-subtitle">View and manage your assigned students</p>
       </div>
-      
+
       {loading ? (
         <div className="loading-text">Loading students...</div>
       ) : students.length === 0 ? (
@@ -52,16 +52,16 @@ function MyStudents() {
       ) : (
         <div className="row">
           {students.map((student, index) => (
-            <StudentCard 
-              key={index} 
-              data={student} 
+            <StudentCard
+              key={index}
+              data={student}
               onChatClick={() => setIsChatOpen(true)}
             />
           ))}
         </div>
       )}
 
-      <ChatModal 
+      <ChatModal
         isOpen={isChatOpen}
         onClose={() => setIsChatOpen(false)}
         userId={mentorId}

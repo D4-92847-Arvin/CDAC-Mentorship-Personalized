@@ -9,8 +9,8 @@ import BrowseMentors from "../BrowseMentors/BrowseMentors";
 import Subscriptions from "../Subscriptions/Subscriptions";
 import Feedback from "../Feedback/Feedback";
 import StudentChatModal from "../../../Component/StudentChatModal/StudentChatModal";
-import { getStudentDashboard } from "../../../services/studentService";
-import { getStudentId, clearStudentAuth } from "../../../services/authService";
+import { getStudentDashboard } from "../../../service/studentService";
+import { getStudentId, clearStudentAuth } from "../../../service/authService";
 
 const sidebarItems = [
   { label: "Dashboard", icon: "🏠" },
@@ -64,7 +64,7 @@ const StudentDashboard = () => {
       console.error("Dashboard Error:", err);
       setError(
         err.response?.data?.message ||
-        "Failed to load dashboard. Please refresh."
+          "Failed to load dashboard. Please refresh.",
       );
     } finally {
       setLoading(false);
@@ -91,9 +91,7 @@ const StudentDashboard = () => {
       <div className="student-dashboard">
         <div className="error-container">
           <p>⚠️ {error}</p>
-          <button onClick={() => window.location.reload()}>
-            Try Again
-          </button>
+          <button onClick={() => window.location.reload()}>Try Again</button>
         </div>
       </div>
     );
@@ -102,7 +100,6 @@ const StudentDashboard = () => {
   return (
     <div className="student-dashboard">
       <aside className="sidebar student-sidebar">
-
         {/* Logo */}
         <div className="sidebar-logo">
           <div className="logo-box">
@@ -121,7 +118,9 @@ const StudentDashboard = () => {
           {sidebarItems.map((item) => (
             <button
               key={item.label}
-              className={"sidebar-item" + (activeTab === item.label ? " active" : "")}
+              className={
+                "sidebar-item" + (activeTab === item.label ? " active" : "")
+              }
               onClick={() => handleTabChange(item.label)}
             >
               <span className="sidebar-icon">{item.icon}</span>
@@ -131,15 +130,15 @@ const StudentDashboard = () => {
         </nav>
 
         {/* Chat Button */}
-        <div className="sidebar-chat" style={{ padding: '1rem' }}>
-          <button 
-            className="btn btn-primary w-100" 
+        <div className="sidebar-chat" style={{ padding: "1rem" }}>
+          <button
+            className="btn btn-primary w-100"
             onClick={() => setIsChatModalOpen(true)}
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              gap: '0.5rem' 
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "0.5rem",
             }}
           >
             <span>💬</span>
@@ -212,28 +211,36 @@ const StudentDashboard = () => {
 
             {/* Embedded Browse Mentors Section */}
             <div className="dashboard-section-divider"></div>
-            <BrowseMentors onNavigateToSubscriptions={() => handleTabChange("Subscriptions")} />
+            <BrowseMentors
+              onNavigateToSubscriptions={() => handleTabChange("Subscriptions")}
+            />
           </>
         )}
 
-        {activeTab === "My Mentor" && <MyMentor onNavigateToDashboard={() => handleTabChange("Dashboard")} />}
+        {activeTab === "My Mentor" && (
+          <MyMentor
+            onNavigateToDashboard={() => handleTabChange("Dashboard")}
+          />
+        )}
         {activeTab === "My Sessions" && <MySessions />}
         {activeTab === "Study Timer" && <StudyTimer />}
         {activeTab === "MCQ Practice" && (
           <MCQPractice onBackToDashboard={() => handleTabChange("Dashboard")} />
         )}
         {activeTab === "Subscriptions" && (
-          <Subscriptions onBackToDashboard={() => handleTabChange("Dashboard")} />
+          <Subscriptions
+            onBackToDashboard={() => handleTabChange("Dashboard")}
+          />
         )}
         {activeTab === "Feedback" && <Feedback />}
 
-        <StudentChatModal 
+        <StudentChatModal
           isOpen={isChatModalOpen}
           onClose={() => setIsChatModalOpen(false)}
           studentId={getStudentId()}
         />
       </main>
-    </div >
+    </div>
   );
 };
 
