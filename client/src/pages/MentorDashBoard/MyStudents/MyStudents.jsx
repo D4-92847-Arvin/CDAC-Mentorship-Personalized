@@ -1,13 +1,41 @@
+import { useState, useEffect } from "react";
 import "./MyStudents.css";
+import "../../../styles/common.css";
 import StudentCard from "../../../Component/MentorComponents/StudentCard/StudentCard";
-
-const students = [
-  { name: "Alex Thompson", sessions: 12, progress: 85, next: "Oct 8, 2:00 PM" },
-  { name: "Emma Wilson", sessions: 8, progress: 72, next: "Oct 9, 3:30 PM" },
-  { name: "Michael Chen", sessions: 15, progress: 91, next: "Oct 10, 1:00 PM" }
-];
+import ChatModal from "../../../Component/MentorComponents/ChatModal/ChatModal";
+import { getMyStudents } from '../../../services/mentorService';
+import { handleApiError } from '../../../utils/toast';
+import { getMentorId } from '../../../services/authService';
 
 function MyStudents() {
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  
+  // Get mentor ID from localStorage (set during login)
+  const mentorId = getMentorId();
+  
+  console.log("MyStudents - Using mentorId:", mentorId);
+
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
+  const fetchStudents = async () => {
+    try {
+      setLoading(true);
+      const response = await getMyStudents(mentorId);
+      
+      if (response.success) {
+        setStudents(response.data || []);
+      }
+    } catch (error) {
+      handleApiError(error, 'Failed to load students');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="my-students-page">
       <div className="page-header">
@@ -15,9 +43,30 @@ function MyStudents() {
         <p className="page-subtitle">View and manage your assigned students</p>
       </div>
       
-      <div className="row">
-        {students.map(s => <StudentCard key={s.name} data={s} />)}
-      </div>
+      {loading ? (
+        <div className="loading-text">Loading students...</div>
+      ) : students.length === 0 ? (
+        <div className="empty-state">
+          <p>No students assigned yet</p>
+        </div>
+      ) : (
+        <div className="row">
+          {students.map((student, index) => (
+            <StudentCard 
+              key={index} 
+              data={student} 
+              onChatClick={() => setIsChatOpen(true)}
+            />
+          ))}
+        </div>
+      )}
+
+      <ChatModal 
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        userId={mentorId}
+        mentorId={mentorId}
+      />
     </div>
   );
 }

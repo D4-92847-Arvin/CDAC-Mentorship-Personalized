@@ -21,11 +21,13 @@
   flex-shrink: 0;
   z-index: 10;
 }
+
 .sidebar-logo {
   padding: 1rem 1.25rem;
   display: flex;
   align-items: center;
 }
+
 .logo-box {
   width: 48px;
   height: 48px;
@@ -36,6 +38,7 @@
   justify-content: center;
   margin-right: 12px;
 }
+
 .logo-circle {
   width: 28px;
   height: 28px;
@@ -43,6 +46,7 @@
   border-radius: 50%;
   position: relative;
 }
+
 .logo-dot {
   width: 8px;
   height: 8px;
@@ -53,19 +57,23 @@
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
 .logo-title {
   font-weight: 600;
   font-size: 16px;
 }
+
 .logo-subtitle {
   font-size: 12px;
 }
+
 .sidebar-menu {
   display: flex;
   flex-direction: column;
   gap: 6px;
   padding: 0.5rem 0.75rem 1rem;
 }
+
 .sidebar-item {
   display: flex;
   align-items: center;
@@ -81,13 +89,16 @@
   transition: background-color 0.2s, color 0.2s;
   white-space: nowrap;
 }
+
 .sidebar-item:hover {
   background-color: #e6fffa;
 }
+
 .sidebar-item.active {
   background-color: #14b8a6;
   color: #fff;
 }
+
 .sidebar-icon {
   font-size: 1.2rem;
   width: 24px;
@@ -95,11 +106,13 @@
   justify-content: center;
   align-items: center;
 }
+
 .sidebar-logout {
   padding: 0.75rem;
   border-top: 1px solid #e5e7eb;
   margin-top: auto;
 }
+
 .dashboard-content {
   flex: 1;
   padding: 32px 40px;
@@ -151,30 +164,35 @@
   gap: 24px;
   margin-bottom: 32px;
 }
+
 .stat-box {
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   padding: 24px;
   flex: 1;
   text-align: center;
 }
+
 .stat-label {
   color: #64748b;
   font-size: 1rem;
   margin-bottom: 8px;
 }
+
 .stat-value {
   font-size: 2rem;
   font-weight: bold;
   color: #1e40af;
 }
+
 .dashboard-widgets {
   display: grid;
   grid-template-columns: 2fr 2fr 1.5fr;
   grid-template-rows: auto auto;
   gap: 24px;
 }
+
 .mentor-section {
   grid-column: 1 / 2;
   grid-row: 1 / 2;
@@ -182,29 +200,35 @@
   border-radius: 12px;
   padding: 24px;
 }
+
 .mentor-info {
   display: flex;
   align-items: center;
   gap: 18px;
 }
+
 .mentor-img {
   width: 64px;
   height: 64px;
   border-radius: 50%;
   object-fit: cover;
 }
+
 .mentor-name {
   font-weight: bold;
   font-size: 1.1rem;
 }
+
 .mentor-field {
   color: #64748b;
   font-size: 0.95rem;
 }
+
 .mentor-rating {
   margin: 6px 0;
   font-size: 0.95rem;
 }
+
 .message-btn {
   background: #1e40af;
   color: #fff;
@@ -214,6 +238,7 @@
   cursor: pointer;
   margin-top: 6px;
 }
+
 .weekly-study-section {
   grid-column: 2 / 3;
   grid-row: 1 / 2;
@@ -221,6 +246,7 @@
   border-radius: 12px;
   padding: 24px;
 }
+
 .bar-chart {
   display: flex;
   align-items: flex-end;
@@ -228,6 +254,7 @@
   height: 120px;
   margin-top: 16px;
 }
+
 .bar-item {
   display: flex;
   flex-direction: column;
@@ -235,16 +262,19 @@
   justify-content: flex-end;
   height: 100%;
 }
+
 .bar {
   width: 22px;
   background: #1e40af;
   border-radius: 6px 6px 0 0;
   margin-bottom: 4px;
 }
+
 .bar-item span {
   font-size: 0.9rem;
   color: #64748b;
 }
+
 .upcoming-section {
   grid-column: 1 / 2;
   grid-row: 2 / 3;
@@ -252,12 +282,14 @@
   border-radius: 12px;
   padding: 24px;
 }
+
 .session-card {
   background: #e2e8f0;
   border-radius: 8px;
   padding: 12px 16px;
   margin-bottom: 10px;
 }
+
 .view-all-btn {
   background: #1e40af;
   color: #fff;
@@ -267,6 +299,7 @@
   cursor: pointer;
   margin-top: 8px;
 }
+
 .performance-section {
   grid-column: 2 / 3;
   grid-row: 2 / 3;
@@ -274,19 +307,23 @@
   border-radius: 12px;
   padding: 24px;
 }
+
 .performance-bars {
   margin-top: 12px;
 }
+
 .performance-bar {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
 }
+
 .performance-bar span {
   width: 70px;
   font-size: 0.95rem;
   color: #64748b;
 }
+
 .performance-bar .bar {
   height: 12px;
   background: #1e40af;
@@ -294,6 +331,7 @@
   margin: 0 8px;
   flex: 1;
 }
+
 .activity-section {
   grid-column: 3 / 4;
   grid-row: 1 / 3;
@@ -304,17 +342,20 @@
   flex-direction: column;
   align-items: center;
 }
+
 .activity-chart {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-top: 12px;
 }
+
 .activity-legend {
   list-style: none;
   padding: 0;
   margin-top: 10px;
 }
+
 .activity-legend li {
   display: flex;
   align-items: center;
@@ -322,6 +363,7 @@
   color: #64748b;
   margin-bottom: 4px;
 }
+
 .dot {
   display: inline-block;
   width: 12px;
@@ -431,182 +473,14 @@
   font-size: 0.9rem;
 }
 
+@media (max-width: 992px) {
+  .dashboard-widgets {
     grid-template-columns: 1fr;
     grid-template-rows: auto;
   }
+
   .activity-section {
     grid-column: 1 / 2;
     grid-row: auto;
   }
-}
-/* DARK MODE STYLES */
-.student-dashboard.dark-mode {
-  background: #1a1a1a;
-}
-
-.student-dashboard.dark-mode .sidebar {
-  background: #2d2d2d;
-  color: #e0e0e0;
-  border-right-color: #444;
-}
-
-.student-dashboard.dark-mode .sidebar-item {
-  color: #b0b0b0;
-}
-
-.student-dashboard.dark-mode .sidebar-item:hover {
-  background: #3a3a3a;
-}
-
-.student-dashboard.dark-mode .sidebar-item.active {
-  background: #667eea;
-  color: #fff;
-}
-
-.student-dashboard.dark-mode .logo-title {
-  color: #e0e0e0;
-}
-
-.student-dashboard.dark-mode .dashboard-content {
-  background: #1a1a1a;
-  color: #e0e0e0;
-}
-
-.student-dashboard.dark-mode h1,
-.student-dashboard.dark-mode h2,
-.student-dashboard.dark-mode h3,
-.student-dashboard.dark-mode h4,
-.student-dashboard.dark-mode h5 {
-  color: #fff;
-}
-
-.student-dashboard.dark-mode .stat-box {
-  background: #2d2d2d;
-  color: #e0e0e0;
-  border-color: #444;
-}
-
-.student-dashboard.dark-mode .alert-banner {
-  background: #3a3a3a;
-  color: #e0e0e0;
-  border-color: #667eea;
-}
-
-.student-dashboard.dark-mode .tabs {
-  background: #2d2d2d;
-  border-color: #444;
-}
-
-.student-dashboard.dark-mode .tabs button {
-  color: #b0b0b0;
-  border-color: #444;
-}
-
-.student-dashboard.dark-mode .tabs button.active {
-  color: #667eea;
-  border-color: #667eea;
-}
-
-.student-dashboard.dark-mode .btn {
-  background: #3a3a3a;
-  color: #e0e0e0;
-  border-color: #555;
-}
-
-.student-dashboard.dark-mode .btn:hover {
-  background: #4a4a4a;
-}
-
-.student-dashboard.dark-mode .btn-light {
-  background: #3a3a3a;
-  color: #e0e0e0;
-  border-color: #555;
-}
-
-.student-dashboard.dark-mode .btn-light:hover {
-  background: #4a4a4a;
-}
-
-.student-dashboard.dark-mode .edit-profile-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
-}
-
-.student-dashboard.dark-mode .edit-profile-btn:hover {
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.7);
-}
-
-.btn-dark-mode-toggle {
-  background: #3a3a3a;
-  color: #e0e0e0;
-  border: 1px solid #555;
-  padding: 10px 15px;
-  border-radius: 8px;
-  font-size: 18px;
-  cursor: pointer;
-  margin-bottom: 10px;
-  width: 100%;
-  transition: all 0.3s ease;
-}
-
-.btn-dark-mode-toggle:hover {
-  background: #4a4a4a;
-  border-color: #667eea;
-}
-
-.student-dashboard.dark-mode .loading-container,
-.student-dashboard.dark-mode .error-container {
-  background: #2d2d2d;
-  color: #e0e0e0;
-}
-
-.student-dashboard.dark-mode .card,
-.student-dashboard.dark-mode .sessions-card,
-.student-dashboard.dark-mode .mentor-profile-card,
-.student-dashboard.dark-mode .feedback-form,
-.student-dashboard.dark-mode .section-card,
-.student-dashboard.dark-mode .modal-content {
-  background: #2d2d2d;
-  color: #e0e0e0;
-  border-color: #444;
-}
-
-.student-dashboard.dark-mode input,
-.student-dashboard.dark-mode textarea,
-.student-dashboard.dark-mode select {
-  background: #3a3a3a;
-  color: #e0e0e0;
-  border-color: #555;
-}
-
-.student-dashboard.dark-mode input::placeholder,
-.student-dashboard.dark-mode textarea::placeholder {
-  color: #888;
-}
-
-.student-dashboard.dark-mode input:focus,
-.student-dashboard.dark-mode textarea:focus,
-.student-dashboard.dark-mode select:focus {
-  border-color: #667eea;
-  background: #3a3a3a;
-  color: #e0e0e0;
-}
-
-.student-dashboard.dark-mode .table {
-  background: #2d2d2d;
-  color: #e0e0e0;
-}
-
-.student-dashboard.dark-mode .table th {
-  background: #3a3a3a;
-  color: #e0e0e0;
-  border-color: #555;
-}
-
-.student-dashboard.dark-mode .table td {
-  border-color: #444;
-}
-
-.student-dashboard.dark-mode .modal-overlay {
-  background: rgba(0, 0, 0, 0.8);
 }

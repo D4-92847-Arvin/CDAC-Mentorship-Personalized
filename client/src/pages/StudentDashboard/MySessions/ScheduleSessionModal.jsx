@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
 import "../../../Component/Modal.css"; // Using a standard modal CSS
-import { bookSession } from "../../../service/studentservice";
-import { getVerifiedMentors } from "../../../service/studentservice";
-import { getStudentId } from "../../../service/authService";
+import { bookSession, deleteSession } from "../../../services/studentService";
+import { getVerifiedMentors } from "../../../services/studentService";
+import { getStudentId } from "../../../services/authService";
+import { createOrder, verifyPayment } from "../../../services/paymentService";
+import { getAvailabilityForDate } from "../../../services/mentorService";
 
-const ScheduleSessionModal = ({ isOpen, onClose, onSessionScheduled }) => {
+const ScheduleSessionModal = ({ isOpen, onClose, onSessionScheduled, preselectedMentorId = null, filterMentorIds = null }) => {
   const [mentors, setMentors] = useState([]);
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
   const [formData, setFormData] = useState({
     mentorId: "",
     sessionDate: "",
@@ -25,14 +29,27 @@ const ScheduleSessionModal = ({ isOpen, onClose, onSessionScheduled }) => {
     }
   }, [isOpen]);
 
+  // Update form data when preselectedMentorId changes or modal opens
+  useEffect(() => {
+    if (isOpen && preselectedMentorId) {
+      setFormData(prev => ({
+        ...prev,
+        mentorId: preselectedMentorId
+      }));
+    }
+  }, [isOpen, preselectedMentorId]);
+
   const fetchMentors = async () => {
     try {
       setMentorLoading(true);
-      const response = await getVerifiedMentors();
+      const studentId = getStudentId();
+      const response = await getVerifiedMentors(studentId);
       setMentors(response.data || []);
       setError("");
     } catch (err) {
       console.error("Error fetching mentors:", err);
+      // If we have a preselected mentor, we might not strictly need the full list if the ID matches
+      // but it's good to have for validation or displaying the name.
       setError("Failed to load mentors. Please try again.");
     } finally {
       setMentorLoading(false);
@@ -48,15 +65,90 @@ const ScheduleSessionModal = ({ isOpen, onClose, onSessionScheduled }) => {
       topic: "",
       description: "",
     });
+    setAvailableSlots([]);
     setError("");
+  };
+
+  // Fetch available slots when mentor and date are selected
+  const fetchAvailableSlots = async (mentorId, date) => {
+    if (!mentorId || !date) {
+      setAvailableSlots([]);
+      return;
+    }
+
+    try {
+      setLoadingSlots(true);
+      setError("");
+      const response = await getAvailabilityForDate(mentorId, date);
+      
+      if (response.success && response.data) {
+        // Filter for available slots that are not booked or blocked
+        const available = response.data.timeSlots
+          .filter(slot => slot.available && !slot.booked && !slot.blocked)
+          .map(slot => slot.timeSlot);
+        
+        setAvailableSlots(available);
+        
+        if (available.length === 0) {
+          setError("No available time slots for this date. Please select another date.");
+        }
+      } else {
+        setAvailableSlots([]);
+        setError("No availability set for this date. Please select another date.");
+      }
+    } catch (err) {
+      console.error("Error fetching availability:", err);
+      setAvailableSlots([]);
+      setError("Failed to load available slots. Please try again.");
+    } finally {
+      setLoadingSlots(false);
+    }
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    
+    // When mentor or date changes, fetch available slots
+    if (name === 'mentorId' || name === 'sessionDate') {
+      const newMentorId = name === 'mentorId' ? value : formData.mentorId;
+      const newDate = name === 'sessionDate' ? value : formData.sessionDate;
+      
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+        startTime: "", // Reset time when mentor or date changes
+        endTime: ""
+      }));
+      
+      if (newMentorId && newDate) {
+        fetchAvailableSlots(newMentorId, newDate);
+      } else {
+        setAvailableSlots([]);
+      }
+    }
+    // If start time is changed, automatically calculate end time (1 hour later)
+    else if (name === 'startTime' && value) {
+      const [hours, minutes] = value.split(':');
+      const startDate = new Date();
+      startDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      
+      // Add 1 hour
+      const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
+      const endHours = String(endDate.getHours()).padStart(2, '0');
+      const endMinutes = String(endDate.getMinutes()).padStart(2, '0');
+      const endTime = `${endHours}:${endMinutes}`;
+      
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+        endTime: endTime
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const validateForm = () => {
@@ -72,18 +164,8 @@ const ScheduleSessionModal = ({ isOpen, onClose, onSessionScheduled }) => {
       setError("Please select a start time");
       return false;
     }
-    if (!formData.endTime) {
-      setError("Please select an end time");
-      return false;
-    }
     if (!formData.topic) {
       setError("Please enter a topic");
-      return false;
-    }
-
-    // Validate end time is after start time
-    if (formData.startTime >= formData.endTime) {
-      setError("End time must be after start time");
       return false;
     }
 
@@ -116,26 +198,94 @@ const ScheduleSessionModal = ({ isOpen, onClose, onSessionScheduled }) => {
         return;
       }
 
+      // Check for Razorpay SDK
+      if (!window.Razorpay) {
+        setError("Payment SDK not loaded.");
+        return;
+      }
+
+      const selectedMentor = mentors.find(m => m.mentorId == formData.mentorId);
+      const sessionFee = selectedMentor ? selectedMentor.ratePerSession : 0;
+
       const sessionData = {
         mentorId: parseInt(formData.mentorId),
         sessionDate: formData.sessionDate,
-        startTime: formData.startTime,
-        endTime: formData.endTime,
+        startTime: formData.startTime + ':00', // Add seconds for backend time format matching
+        // endTime will be auto-calculated by backend (1 hour from startTime)
         topic: formData.topic,
         description: formData.description || "",
       };
 
-      await bookSession(studentId, sessionData);
+      // 1. Create Session (Status: PAYMENT_PENDING)
+      const bookingResponse = await bookSession(studentId, sessionData);
+      const newSessionId = bookingResponse.data.sessionId;
 
-      // Show success message and close modal
-      alert("Session scheduled successfully!");
-      onSessionScheduled();
-      onClose();
+      if (!newSessionId) {
+        throw new Error("Failed to generate session ID");
+      }
+
+      // 2. Create Razorpay Order
+      // Passing planId=1 (Pay Per Session) for reference, but amount is dynamic
+      const orderRes = await createOrder(studentId, 1, sessionFee, newSessionId);
+
+      const orderData = orderRes.data;
+
+      // 3. Open Razorpay
+      const options = {
+        key: orderData.razorpayKey,
+        amount: orderData.amount, // in paise
+        currency: "INR",
+        name: "Mentorship Session",
+        description: `Session with ${selectedMentor?.name}`,
+        order_id: orderData.orderId,
+        handler: async function (response) {
+          try {
+            // 4. Verify Payment
+            await verifyPayment({
+              studentId,
+              planId: 1,
+              amount: sessionFee,
+              razorpayOrderId: orderData.orderId,
+              razorpayPaymentId: response.razorpay_payment_id,
+              sessionId: newSessionId
+            });
+
+            // Success!
+            alert(`✅ Payment Successful! Session Scheduled.\n\nCheck 'My Sessions' for details.`);
+            onSessionScheduled();
+            onClose();
+          } catch (err) {
+            console.error("Payment Verification Failed:", err);
+            alert("❌ Payment Verification Failed. Please contact support.");
+          }
+        },
+        modal: {
+          ondismiss: async function () {
+            // Delete the pending session so it doesn't clutter the history
+            try {
+              if (newSessionId) {
+                await deleteSession(newSessionId);
+                console.log("Pending session deleted due to payment cancellation.");
+              }
+            } catch (delErr) {
+              console.warn("Failed to delete pending session:", delErr);
+            }
+            // Alert user
+            alert("❌ Payment Cancelled. Session booking has been aborted.");
+            onClose();
+          },
+        },
+        theme: { color: "#2563eb" },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+
     } catch (err) {
       console.error("Error scheduling session:", err);
       setError(
         err.response?.data?.message ||
-          "Failed to schedule session. Please try again."
+        "Failed to schedule session. Please try again."
       );
     } finally {
       setLoading(false);
@@ -164,18 +314,30 @@ const ScheduleSessionModal = ({ isOpen, onClose, onSessionScheduled }) => {
 
             <div className="form-group">
               <label>Select Mentor *</label>
+
               <select
                 name="mentorId"
                 value={formData.mentorId}
                 onChange={handleInputChange}
-                disabled={mentorLoading || loading}
+                disabled={mentorLoading || loading || !!preselectedMentorId}
+                style={preselectedMentorId ? { backgroundColor: '#e9ecef', cursor: 'not-allowed' } : {}}
               >
                 <option value="">Choose a mentor...</option>
-                {mentors.map((mentor) => (
-                  <option key={mentor.mentorId} value={mentor.mentorId}>
-                    {mentor.name} - {mentor.domain || "General"}
-                  </option>
-                ))}
+                {mentors
+                  .filter(mentor => {
+                    // If filtered list is provided (even if empty), show only those
+                    if (filterMentorIds !== null) {
+                      return filterMentorIds.includes(mentor.mentorId);
+                    }
+
+                    // Otherwise show all
+                    return true;
+                  })
+                  .map((mentor) => (
+                    <option key={mentor.mentorId} value={mentor.mentorId}>
+                      {mentor.name} - {mentor.domain || "General"}
+                    </option>
+                  ))}
               </select>
             </div>
 
@@ -194,22 +356,45 @@ const ScheduleSessionModal = ({ isOpen, onClose, onSessionScheduled }) => {
             <div className="form-row">
               <div className="form-group">
                 <label>Start Time *</label>
-                <input
-                  type="time"
-                  name="startTime"
-                  value={formData.startTime}
-                  onChange={handleInputChange}
-                  disabled={loading}
-                />
+                {availableSlots.length > 0 ? (
+                  <select
+                    name="startTime"
+                    value={formData.startTime}
+                    onChange={handleInputChange}
+                    disabled={loading || loadingSlots}
+                  >
+                    <option value="">Choose available time...</option>
+                    {availableSlots.map((slot) => (
+                      <option key={slot} value={slot.substring(0, 5)}>
+                        {slot.substring(0, 5)} {/* Display HH:MM format */}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <select
+                    name="startTime"
+                    disabled
+                    style={{ backgroundColor: '#e9ecef', cursor: 'not-allowed' }}
+                  >
+                    <option value="">
+                      {loadingSlots 
+                        ? "Loading slots..." 
+                        : formData.mentorId && formData.sessionDate
+                          ? "No slots available"
+                          : "Select mentor & date first"}
+                    </option>
+                  </select>
+                )}
               </div>
               <div className="form-group">
-                <label>End Time *</label>
+                <label>End Time * (Auto: Start + 1hr)</label>
                 <input
                   type="time"
                   name="endTime"
                   value={formData.endTime}
-                  onChange={handleInputChange}
-                  disabled={loading}
+                  readOnly
+                  disabled
+                  style={{ backgroundColor: '#e9ecef', cursor: 'not-allowed' }}
                 />
               </div>
             </div>
@@ -252,7 +437,15 @@ const ScheduleSessionModal = ({ isOpen, onClose, onSessionScheduled }) => {
                 className="btn-schedule"
                 disabled={loading || mentorLoading}
               >
-                {loading ? "Scheduling..." : "Schedule Session"}
+                {loading
+                  ? "Processing..."
+                  : (() => {
+                    const selectedMentor = mentors.find(
+                      (m) => m.mentorId == formData.mentorId
+                    );
+                    const fee = selectedMentor?.ratePerSession || 0;
+                    return fee > 0 ? `Pay ₹${fee} & Schedule` : "Schedule Session";
+                  })()}
               </button>
             </div>
           </form>

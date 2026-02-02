@@ -1,33 +1,43 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import "./StudentDashboard.css";
 import MyMentor from "../MyMentor/MyMentor";
 import MySessions from "../MySessions/MySessions";
 import MCQPractice from "../MCQPractice/MCQPractice";
+import StudyTimer from "../StudyTimer/StudyTimer";
+import BrowseMentors from "../BrowseMentors/BrowseMentors";
 import Subscriptions from "../Subscriptions/Subscriptions";
 import Feedback from "../Feedback/Feedback";
-import EditProfileModal from "./EditProfileModal";
-import { getStudentDashboard } from "../../../service/studentservice";
-import { getStudentId, clearStudentAuth } from "../../../service/authService";
-import { useDarkMode } from "../../../context/DarkModeContext";
+import StudentChatModal from "../../../Component/StudentChatModal/StudentChatModal";
+import { getStudentDashboard } from "../../../services/studentService";
+import { getStudentId, clearStudentAuth } from "../../../services/authService";
 
 const sidebarItems = [
   { label: "Dashboard", icon: "🏠" },
   { label: "My Mentor", icon: "👩‍🏫" },
   { label: "My Sessions", icon: "📅" },
+  { label: "Study Timer", icon: "⏱️" },
   { label: "MCQ Practice", icon: "📝" },
   { label: "Subscriptions", icon: "💳" },
-  { label: "Feedback", icon: "💬" },
+  { label: "Feedback", icon: "�" },
 ];
 
 const StudentDashboard = () => {
-  const [activeTab, setActiveTab] = useState("Dashboard");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  // Get active tab from URL or default to 'Dashboard'
+  const activeTab = searchParams.get("tab") || "Dashboard";
+
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const navigate = useNavigate();
-  const { isDarkMode, toggleDarkMode } = useDarkMode();
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+
+  // Helper to change tab
+  const handleTabChange = (tabName) => {
+    setSearchParams({ tab: tabName });
+  };
 
   useEffect(() => {
     const studentId = getStudentId();
@@ -54,7 +64,7 @@ const StudentDashboard = () => {
       console.error("Dashboard Error:", err);
       setError(
         err.response?.data?.message ||
-          "Failed to load dashboard. Please refresh."
+        "Failed to load dashboard. Please refresh."
       );
     } finally {
       setLoading(false);
@@ -90,7 +100,7 @@ const StudentDashboard = () => {
   }
 
   return (
-    <div className={`student-dashboard ${isDarkMode ? 'dark-mode' : ''}`}>
+    <div className="student-dashboard">
       <aside className="sidebar student-sidebar">
 
         {/* Logo */}
@@ -112,7 +122,7 @@ const StudentDashboard = () => {
             <button
               key={item.label}
               className={"sidebar-item" + (activeTab === item.label ? " active" : "")}
-              onClick={() => setActiveTab(item.label)}
+              onClick={() => handleTabChange(item.label)}
             >
               <span className="sidebar-icon">{item.icon}</span>
               <span>{item.label}</span>
@@ -120,15 +130,25 @@ const StudentDashboard = () => {
           ))}
         </nav>
 
+        {/* Chat Button */}
+        <div className="sidebar-chat" style={{ padding: '1rem' }}>
+          <button 
+            className="btn btn-primary w-100" 
+            onClick={() => setIsChatModalOpen(true)}
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              gap: '0.5rem' 
+            }}
+          >
+            <span>💬</span>
+            <span>Chat with Mentor</span>
+          </button>
+        </div>
+
         {/* Logout */}
         <div className="sidebar-logout">
-          <button 
-            className="btn btn-dark-mode-toggle"
-            onClick={toggleDarkMode}
-            title={isDarkMode ? "Light Mode" : "Dark Mode"}
-          >
-            {isDarkMode ? "☀️" : "🌙"}
-          </button>
           <button className="btn btn-light w-100" onClick={handleLogout}>
             Logout
           </button>
@@ -152,12 +172,6 @@ const StudentDashboard = () => {
                 <h1>Student Dashboard</h1>
                 <p>Your session analytics</p>
               </div>
-              <button 
-                className="edit-profile-btn"
-                onClick={() => setIsEditModalOpen(true)}
-              >
-                ✏️ Edit Profile
-              </button>
             </div>
 
             {dashboard ? (
@@ -195,26 +209,31 @@ const StudentDashboard = () => {
                 <p>Unable to load dashboard statistics.</p>
               </div>
             )}
+
+            {/* Embedded Browse Mentors Section */}
+            <div className="dashboard-section-divider"></div>
+            <BrowseMentors onNavigateToSubscriptions={() => handleTabChange("Subscriptions")} />
           </>
         )}
 
-        {activeTab === "My Mentor" && <MyMentor />}
+        {activeTab === "My Mentor" && <MyMentor onNavigateToDashboard={() => handleTabChange("Dashboard")} />}
         {activeTab === "My Sessions" && <MySessions />}
+        {activeTab === "Study Timer" && <StudyTimer />}
         {activeTab === "MCQ Practice" && (
-          <MCQPractice onBackToDashboard={() => setActiveTab("Dashboard")} />
+          <MCQPractice onBackToDashboard={() => handleTabChange("Dashboard")} />
         )}
         {activeTab === "Subscriptions" && (
-          <Subscriptions onBackToDashboard={() => setActiveTab("Dashboard")} />
+          <Subscriptions onBackToDashboard={() => handleTabChange("Dashboard")} />
         )}
         {activeTab === "Feedback" && <Feedback />}
 
-        <EditProfileModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          onProfileUpdated={fetchDashboard}
+        <StudentChatModal 
+          isOpen={isChatModalOpen}
+          onClose={() => setIsChatModalOpen(false)}
+          studentId={getStudentId()}
         />
       </main>
-    </div>
+    </div >
   );
 };
 

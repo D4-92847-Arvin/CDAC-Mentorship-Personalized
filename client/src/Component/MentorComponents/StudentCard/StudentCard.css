@@ -96,7 +96,8 @@
 
 .student-actions {
   display: flex;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .btn-chat {
@@ -133,4 +134,21 @@
 .btn-schedule:hover {
   background: #f9fafb;
   border-color: #d1d5db;
+}
+
+.btn-mcq {
+  flex: 1;
+  background: #4f46e5;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-mcq:hover {
+  background: #4338ca;
+  color: white;
 }
