@@ -4,7 +4,7 @@ import {
   submitFeedback,
   getStudentFeedbacks,
   getStudentSessions,
-} from "../../../service/studentservice";
+} from "../../../service/studentService";
 import { getStudentId } from "../../../service/authService";
 
 const feedbackOptions = [
@@ -45,17 +45,29 @@ const Feedback = () => {
         return;
       }
 
-      // Fetch completed sessions
-      const sessionsResponse = await getStudentSessions(studentId);
-      const sessions = sessionsResponse.data || [];
-      const completed = sessions.filter((s) => s.status === "COMPLETED");
-      setCompletedSessions(completed);
+      // Fetch both sessions and feedbacks
+      const [sessionsResponse, feedbacksResponse] = await Promise.all([
+        getStudentSessions(studentId),
+        getStudentFeedbacks(studentId),
+      ]);
 
-      // Fetch existing feedbacks
-      const feedbacksResponse = await getStudentFeedbacks(studentId);
+      const sessions = sessionsResponse.data || [];
       const feedbacks = feedbacksResponse.data || [];
+
       setStudentFeedbacks(feedbacks);
 
+      // Create a Set of session IDs that already have feedback
+      const sessionsWithFeedback = new Set(
+        feedbacks.map((fb) => fb.sessionId).filter((id) => id != null),
+      );
+
+      // Filter sessions: Must be COMPLETED and NOT in the feedback set
+      const completedAndAvailable = sessions.filter(
+        (s) =>
+          s.status === "COMPLETED" && !sessionsWithFeedback.has(s.sessionId),
+      );
+
+      setCompletedSessions(completedAndAvailable);
       setError(null);
     } catch (err) {
       console.error("Error fetching data:", err);
@@ -69,7 +81,7 @@ const Feedback = () => {
     setSelectedOptions((prev) =>
       prev.includes(option)
         ? prev.filter((o) => o !== option)
-        : [...prev, option]
+        : [...prev, option],
     );
   };
 
@@ -127,7 +139,8 @@ const Feedback = () => {
     } catch (err) {
       console.error("Error submitting feedback:", err);
       setError(
-        err.response?.data?.message || "Failed to submit feedback. Please try again."
+        err.response?.data?.message ||
+          "Failed to submit feedback. Please try again.",
       );
     } finally {
       setSubmitting(false);
@@ -204,7 +217,8 @@ const Feedback = () => {
                   <span
                     key={star}
                     className={
-                      "star" + (hover >= star || rating >= star ? " filled" : "")
+                      "star" +
+                      (hover >= star || rating >= star ? " filled" : "")
                     }
                     onMouseEnter={() => setHover(star)}
                     onMouseLeave={() => setHover(0)}
@@ -222,7 +236,9 @@ const Feedback = () => {
             </div>
 
             <div className="feedback-section">
-              <div className="feedback-label">Tell us about your experience</div>
+              <div className="feedback-label">
+                Tell us about your experience
+              </div>
               <textarea
                 className="feedback-textarea"
                 placeholder="Share your thoughts, suggestions, or any feedback about your mentorship sessions..."
@@ -230,9 +246,7 @@ const Feedback = () => {
                 onChange={(e) => setText(e.target.value)}
                 maxLength={500}
               />
-              <div className="char-count">
-                {text.length} / 500 characters
-              </div>
+              <div className="char-count">{text.length} / 500 characters</div>
             </div>
 
             <div className="feedback-section">

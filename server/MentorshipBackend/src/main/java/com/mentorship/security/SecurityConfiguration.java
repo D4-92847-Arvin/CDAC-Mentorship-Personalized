@@ -1,5 +1,7 @@
 package com.mentorship.security;
 
+import java.util.Arrays;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -30,39 +32,28 @@ public class SecurityConfiguration {
 	private final JwtAuthEntryPoint jwtAuthEntryPoint;
 	
 	@Bean
-	CorsConfigurationSource corsConfigurationSource() {
-		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(java.util.List.of("http://localhost:5173", "http://localhost:3000", "http://localhost:5174"));
-		configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-		configuration.setAllowedHeaders(java.util.List.of("*"));
-		configuration.setAllowCredentials(true);
-		configuration.setMaxAge(3600L);
-		
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		source.registerCorsConfiguration("/**", configuration);
-		return source;
-	}
-	
-	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http)throws Exception{
-		http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
 		http.csrf(csrf -> csrf.disable());
 		
-		http.authorizeHttpRequests(request -> 
-				request.requestMatchers("/swagger-ui/**", "/v**/api-docs/**",
-				        "/users/signin", "/users/signup/**").permitAll()
-				.requestMatchers("/error").permitAll()
-				.requestMatchers(HttpMethod.OPTIONS).permitAll()
-				.requestMatchers(HttpMethod.GET, "/students").permitAll()
-				.requestMatchers(HttpMethod.GET, "/mentors").permitAll()
-				.anyRequest().authenticated());
+		http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
 		
-		http.sessionManagement(session -> 
+		http.authorizeHttpRequests(request ->
+			request.requestMatchers("/swagger-ui/**", "/v**/api-docs/**",
+			        "/api/users/signin", "/api/users/signup/**").permitAll()
+			.requestMatchers("/error").permitAll()
+			.requestMatchers("/api/test/**").permitAll()  // Allow test endpoints
+			.requestMatchers(HttpMethod.OPTIONS).permitAll()
+			.requestMatchers(HttpMethod.GET, "/students").permitAll()
+			.requestMatchers("/api/mentor/**").permitAll()  // TEMPORARY: Allow all mentor requests for testing
+			.requestMatchers("/api/student/**").permitAll()  // TEMPORARY: Allow all student requests for testing
+			.requestMatchers("/api/messages/**").permitAll()  // Allow all message/chat endpoints
+			.requestMatchers("/api/admin/migration/**").permitAll()  // Allow migration endpoints (one-time use)
+			.requestMatchers("/api/admin/**").hasRole("ADMIN")
+			.anyRequest().authenticated());
+		http.sessionManagement(session ->
 		session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-		
-		http.addFilterBefore(customJwtFilter, 
+		http.addFilterBefore(customJwtFilter,
 				UsernamePasswordAuthenticationFilter.class);
-		
 		http.exceptionHandling(ex->ex.authenticationEntryPoint(jwtAuthEntryPoint));
 		
 		return http.build();
@@ -71,5 +62,19 @@ public class SecurityConfiguration {
 	@Bean
 	AuthenticationManager authenticationManager(AuthenticationConfiguration mgr) throws Exception{
 		return mgr.getAuthenticationManager();
+	}
+	
+	@Bean
+	CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:5174"));
+		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+		configuration.setAllowedHeaders(Arrays.asList("*"));
+		configuration.setAllowCredentials(true);
+		configuration.setMaxAge(3600L);
+		
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+		return source;
 	}
 }

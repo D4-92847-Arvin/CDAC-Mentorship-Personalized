@@ -55,6 +55,9 @@ public class User extends BaseEntity{
 	@Column(name="user_role")
 	private UserRole userRole;
 
+	@Column(name="is_deleted")
+	private Boolean deleted = false;
+
 	public User(String firstName, String lastName, String email, String password, LocalDate dob, String address,
 			String phoneNo) {
 		super();

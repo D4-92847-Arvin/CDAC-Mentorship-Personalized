@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "./MySessions.css";
-import { getStudentSessions, cancelSession } from "../../../service/studentservice";
+import {
+  getStudentSessions,
+  cancelSession,
+} from "../../../service/studentService";
 import { getStudentId } from "../../../service/authService";
 import ScheduleSessionModal from "./ScheduleSessionModal";
 
@@ -19,7 +22,7 @@ const MySessions = () => {
     try {
       setLoading(true);
       const studentId = getStudentId();
-      
+
       if (!studentId) {
         setError("Student ID not found. Please log in again.");
         setLoading(false);
@@ -35,10 +38,35 @@ const MySessions = () => {
       const past = [];
 
       sessions.forEach((session) => {
+        // Construct a precise Date object for the session
+        // session.sessionDate is YYYY-MM-DD, session.startTime is HH:MM:SS
+        const sessionDateTime = new Date(
+          `${session.sessionDate}T${session.startTime}`,
+        );
         const sessionDate = new Date(session.sessionDate);
-        
+
+        // Deterministic Zoom Link Generation (Frontend Only)
+        // Consistently generates the same link for the same session details
+        const generateZoomLink = () => {
+          // Create a seed string from unique session details
+          const seed = `${session.mentorId}-${session.sessionDate}-${session.startTime}`;
+          let hash = 0;
+          for (let i = 0; i < seed.length; i++) {
+            hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+          }
+          // Ensure 10-digit positive ID
+          const meetingId = Math.abs(hash)
+            .toString()
+            .slice(0, 10)
+            .padEnd(10, "0");
+          // Add a pseudo-random password based on the hash
+          const pwd = Math.abs(hash).toString(36).slice(0, 6);
+          return `https://zoom.us/j/${meetingId}?pwd=${pwd}`;
+        };
+
         const sessionObj = {
           sessionId: session.sessionId,
+          mentorId: session.mentorId, // Added mentorId
           title: session.topic,
           mentor: session.mentorName,
           date: sessionDate.toLocaleDateString("en-US", {
@@ -51,14 +79,15 @@ const MySessions = () => {
           status: session.status,
           fee: session.sessionFee,
           description: session.description,
+          meetingUrl: generateZoomLink(), // Always generate on fly
         };
 
         // Categorize sessions
         if (session.status === "CANCELLED") {
           // Cancelled sessions go to past sessions
           past.push(sessionObj);
-        } else if (sessionDate > now && session.status !== "COMPLETED") {
-          // Future sessions that are not completed go to upcoming
+        } else if (sessionDateTime > now && session.status !== "COMPLETED") {
+          // Future sessions (including later today) that are not completed go to upcoming
           upcoming.push(sessionObj);
         } else {
           // Completed or past sessions go to past
@@ -67,12 +96,8 @@ const MySessions = () => {
       });
 
       // Sort by date
-      upcoming.sort(
-        (a, b) => new Date(a.date) - new Date(b.date)
-      );
-      past.sort(
-        (a, b) => new Date(b.date) - new Date(a.date)
-      );
+      upcoming.sort((a, b) => new Date(a.date) - new Date(b.date));
+      past.sort((a, b) => new Date(b.date) - new Date(a.date));
 
       setUpcomingSessions(upcoming);
       setPastSessions(past);
@@ -110,7 +135,7 @@ const MySessions = () => {
     if (!window.confirm("Are you sure you want to cancel this session?")) {
       return;
     }
-    
+
     try {
       setLoading(true);
       await cancelSession(sessionId);
@@ -134,17 +159,25 @@ const MySessions = () => {
     );
   }
 
+  // Calculate filterMentorIds
+  // Calculate filterMentorIds
+  // Collect unique mentor IDs ONLY from UPCOMING active sessions
+  // This matches the "Your Mentors" logic which only shows active mentors
+  // Users must browse verified mentors to re-book past/completed mentors if they are no longer active
+  const filterMentorIds = [...new Set(upcomingSessions.map((s) => s.mentorId))];
+
   return (
     <div className="my-sessions-page">
       <h2>My Sessions</h2>
       <p>View and manage your mentorship sessions</p>
 
-      <ScheduleSessionModal 
+      <ScheduleSessionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSessionScheduled={fetchSessions}
+        filterMentorIds={filterMentorIds}
       />
-      
+
       {error && (
         <div className="error-message">
           <span>⚠️ {error}</span>
@@ -155,54 +188,108 @@ const MySessions = () => {
       <div className="sessions-main-content">
         <div className="sessions-card">
           <div className="sessions-header">
-            <span>
-              Upcoming Sessions ({upcomingSessions.length})
-            </span>
-            <button 
+            <span>Upcoming Sessions ({upcomingSessions.length})</span>
+            <button
               className="schedule-btn"
               onClick={() => setIsModalOpen(true)}
             >
-              <span role="img" aria-label="calendar">📅</span> Schedule New
+              <span role="img" aria-label="calendar">
+                📅
+              </span>{" "}
+              Schedule New
             </button>
           </div>
           {upcomingSessions.length === 0 ? (
             <div className="no-sessions">
               <p>No upcoming sessions scheduled</p>
-              <p className="text-muted">Book a session with a mentor to get started</p>
+              <p className="text-muted">
+                Book a session with a mentor to get started
+              </p>
             </div>
           ) : (
             upcomingSessions.map((session, idx) => (
               <div className="session-row" key={session.sessionId || idx}>
-                <div className="session-title">{session.title}</div>
-                <div className="session-info">
-                  <span>{session.mentor}</span>
-                  <span>•</span>
-                  <span>{session.date}</span>
-                  <span>•</span>
-                  <span>{session.time}</span>
-                  <span>•</span>
-                  <span>Duration: {session.duration}</span>
+                <div className="session-row-content">
+                  <div className="session-title">{session.title}</div>
+                  <div className="session-info">
+                    <span>{session.mentor}</span>
+                    <span>•</span>
+                    <span>{session.date}</span>
+                    <span>•</span>
+                    <span>{session.time}</span>
+                    <span>•</span>
+                    <span>Duration: {session.duration}</span>
+                  </div>
+                  <div className="session-status">
+                    <span
+                      className={
+                        session.status === "SCHEDULED"
+                          ? "status-confirmed"
+                          : session.status === "COMPLETED"
+                            ? "status-completed"
+                            : "status-pending"
+                      }
+                    >
+                      {session.status}
+                    </span>
+                    <button
+                      className="session-cancel-btn"
+                      onClick={() => handleCancelSession(session.sessionId)}
+                      title="Cancel Session"
+                    >
+                      <span role="img" aria-label="cancel">
+                        ❌
+                      </span>
+                    </button>
+                  </div>
                 </div>
-                <div className="session-status">
-                  <span
-                    className={
-                      session.status === "SCHEDULED"
-                        ? "status-confirmed"
-                        : session.status === "COMPLETED"
-                        ? "status-completed"
-                        : "status-pending"
-                    }
+                {/* Display Zoom Link if available */}
+                {session.meetingUrl && (
+                  <div
+                    className="session-join-link"
+                    style={{
+                      width: "100%",
+                      paddingTop: "8px",
+                      borderTop: "1px solid #e2e8f0",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
                   >
-                    {session.status}
-                  </span>
-                  <button
-                    className="session-cancel-btn"
-                    onClick={() => handleCancelSession(session.sessionId)}
-                    title="Cancel Session"
-                  >
-                    <span role="img" aria-label="cancel">❌</span>
-                  </button>
-                </div>
+                    <span
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: "bold",
+                        color: "#64748b",
+                        marginRight: "8px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      <span
+                        role="img"
+                        aria-label="camera"
+                        style={{ fontSize: "16px" }}
+                      >
+                        🎥
+                      </span>
+                      Join Meeting:
+                    </span>
+                    <a
+                      href={session.meetingUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        color: "#2563eb",
+                        textDecoration: "none",
+                        fontWeight: "600",
+                        fontSize: "14px",
+                      }}
+                    >
+                      {session.meetingUrl}
+                    </a>
+                  </div>
+                )}
               </div>
             ))
           )}
@@ -232,8 +319,8 @@ const MySessions = () => {
                       session.status === "COMPLETED"
                         ? "status-completed"
                         : session.status === "CANCELLED"
-                        ? "status-cancelled"
-                        : "status-pending"
+                          ? "status-cancelled"
+                          : "status-pending"
                     }
                   >
                     {session.status}

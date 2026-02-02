@@ -3,7 +3,7 @@ package com.mentorship.security;
 import java.util.Collection;
 import java.util.List;
 
-
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,9 +13,17 @@ import com.mentorship.entities.User;
 public class CustomUserDetails implements UserDetails {
 
 	private final User user;
+	private Long studentId;
+	private Long mentorId;
 	
 	public CustomUserDetails(User user) {
         this.user = user;
+    }
+	
+	public CustomUserDetails(User user, Long studentId, Long mentorId) {
+        this.user = user;
+        this.studentId = studentId;
+        this.mentorId = mentorId;
     }
 	
 	@Override
@@ -25,7 +33,7 @@ public class CustomUserDetails implements UserDetails {
 	}
 
 	@Override
-	public String getPassword() {
+	public @Nullable String getPassword() {
 		// TODO Auto-generated method stub
 		return user.getPassword();
 	}
@@ -38,40 +46,14 @@ public class CustomUserDetails implements UserDetails {
 	
 	public long getUserId() {
 		return user.getUserId();
-
 	}
 	
-	public String getFullName() {
-		String firstName = user.getFirstName();
-		String lastName = user.getLastName();
-		if (lastName != null && !lastName.isEmpty()) {
-			return firstName + " " + lastName;
-		}
-		return firstName;
+	public Long getStudentId() {
+		return studentId;
 	}
 	
-	public User getUser() {
-		return user;
-	}
-
-	@Override
-	public boolean isAccountNonExpired() {
-		return true; // Account is not expired
-	}
-
-	@Override
-	public boolean isAccountNonLocked() {
-		return true; // Account is not locked
-	}
-
-	@Override
-	public boolean isCredentialsNonExpired() {
-		return true; // Credentials are not expired
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return true; // Account is enabled
+	public Long getMentorId() {
+		return mentorId;
 	}
 
 }

@@ -1,14 +1,14 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { useAuth } from "../../../API/AuthContext";
 import "./Sidebar.css";
 
 function Sidebar() {
-  const { logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout();
-    navigate("/");
+    // Clear all localStorage data
+    localStorage.clear();
+    // Navigate to login page
+    navigate("/login");
   };
 
   return (
@@ -28,7 +28,7 @@ function Sidebar() {
       </div>
 
       <nav className="sidebar-nav">
-        <NavLink to="/mentor" end className={({isActive}) => `nav-item ${isActive ? 'active' : ''}`}>
+        <NavLink to="/mentor/dashboard" className={({isActive}) => `nav-item ${isActive ? 'active' : ''}`}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
             <polyline points="9 22 9 12 15 12 15 22"/>

@@ -65,23 +65,38 @@
 .availability-page .calendar-wrapper .react-calendar__tile {
   padding: 10px;
   font-size: 14px;
+  position: relative;
 }
 
 .availability-page .calendar-wrapper .react-calendar__tile--now {
-  background: #0d9488;
-  color: white;
+  background: #dbeafe;
+  color: #1e40af;
   border-radius: 50%;
+  font-weight: 600;
 }
 
 .availability-page .calendar-wrapper .react-calendar__tile--active {
-  background: #0d9488;
-  color: white;
+  background: #3b82f6 !important;
+  color: white !important;
   border-radius: 50%;
+  font-weight: 700;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.availability-page .calendar-wrapper .react-calendar__tile--now.react-calendar__tile--active {
+  background: #3b82f6 !important;
+  color: white !important;
 }
 
 .availability-page .calendar-wrapper .react-calendar__tile:enabled:hover {
-  background: #e6f7f5;
+  background: #f3f4f6;
   border-radius: 50%;
+}
+
+.availability-page .calendar-wrapper .react-calendar__tile:disabled {
+  background: #fafafa;
+  color: #d1d5db;
+  cursor: not-allowed;
 }
 
 .time-slots-list {

@@ -1,37 +1,66 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./VerificationContent.css";
+import { adminDashboardService } from "../../../service/adminDashboardService";
 
-const VerificationContent = () => {
-  const pendingVerifications = [
-    {
-      id: 1,
-      name: "John Doe",
-      type: "Mentor",
-      submitted: "2 days ago",
-      status: "Pending",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      type: "Student",
-      submitted: "1 day ago",
-      status: "Pending",
-    },
-    {
-      id: 3,
-      name: "Mike Johnson",
-      type: "Mentor",
-      submitted: "3 hours ago",
-      status: "Pending",
-    },
-    {
-      id: 4,
-      name: "Sarah Williams",
-      type: "Student",
-      submitted: "5 hours ago",
-      status: "Pending",
-    },
-  ];
+const VerificationContent = ({ onDataRefresh }) => {
+  const [pendingVerifications, setPendingVerifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
+
+  useEffect(() => {
+    fetchPendingVerifications();
+  }, []);
+
+  const fetchPendingVerifications = async () => {
+    try {
+      setLoading(true);
+      const data = await adminDashboardService.getPendingVerifications();
+      setPendingVerifications(data);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching pending verifications:", err);
+      setError("Failed to load pending verifications");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApprove = async (mentorId) => {
+    try {
+      await adminDashboardService.approveMentor(mentorId);
+      setSuccessMessage("Mentor approved successfully!");
+      fetchPendingVerifications();
+      if (onDataRefresh) onDataRefresh(); // Refresh overview data
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      console.error("Error approving mentor:", err);
+      setError("Failed to approve mentor");
+    }
+  };
+
+  const handleReject = async (mentorId) => {
+    try {
+      await adminDashboardService.rejectMentor(mentorId);
+      setSuccessMessage("Mentor rejected successfully!");
+      fetchPendingVerifications();
+      if (onDataRefresh) onDataRefresh(); // Refresh overview data
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      console.error("Error rejecting mentor:", err);
+      setError("Failed to reject mentor");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center py-5">
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -42,51 +71,93 @@ const VerificationContent = () => {
         </p>
       </div>
 
+      {successMessage && (
+        <div
+          className="alert alert-success alert-dismissible fade show"
+          role="alert"
+        >
+          {successMessage}
+          <button
+            type="button"
+            className="btn-close"
+            onClick={() => setSuccessMessage("")}
+          ></button>
+        </div>
+      )}
+
+      {error && (
+        <div
+          className="alert alert-danger alert-dismissible fade show"
+          role="alert"
+        >
+          {error}
+          <button
+            type="button"
+            className="btn-close"
+            onClick={() => setError("")}
+          ></button>
+        </div>
+      )}
+
       <div className="card-box">
         <h5 className="card-header-title mb-3">Pending Verifications</h5>
 
-        <div className="table-responsive">
-          <table className="table table-hover align-middle">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Submitted</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pendingVerifications.map((item) => (
-                <tr key={item.id}>
-                  <td className="fw-semibold">{item.name}</td>
-                  <td>
-                    <span
-                      className={
-                        "badge-type " +
-                        (item.type === "Mentor"
-                          ? "badge-type-mentor"
-                          : "badge-type-student")
-                      }
-                    >
-                      {item.type}
-                    </span>
-                  </td>
-                  <td className="text-muted">{item.submitted}</td>
-                  <td>
-                    <span className="badge-pending">{item.status}</span>
-                  </td>
-                  <td>
-                    <button className="btn btn-sm btn-success me-2">
-                      Approve
-                    </button>
-                    <button className="btn btn-sm btn-danger">Reject</button>
-                  </td>
+        {pendingVerifications.length === 0 ? (
+          <div className="alert alert-info">No pending verifications</div>
+        ) : (
+          <div className="table-responsive">
+            <table className="table table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Submitted</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {pendingVerifications.map((item) => (
+                  <tr key={item.userId}>
+                    <td className="fw-semibold">{item.name}</td>
+                    <td>
+                      <span
+                        className={
+                          "badge-type " +
+                          (item.type === "MENTOR"
+                            ? "badge-type-mentor"
+                            : "badge-type-student")
+                        }
+                      >
+                        {item.type}
+                      </span>
+                    </td>
+                    <td className="text-muted">
+                      {new Date(item.submittedAt).toLocaleDateString()}
+                    </td>
+                    <td>
+                      <span className="badge-pending">{item.status}</span>
+                    </td>
+                    <td>
+                      <button
+                        className="btn btn-sm btn-success me-2"
+                        onClick={() => handleApprove(item.userId)}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        className="btn btn-sm btn-danger"
+                        onClick={() => handleReject(item.userId)}
+                      >
+                        Reject
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

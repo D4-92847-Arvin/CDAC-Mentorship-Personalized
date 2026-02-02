@@ -15,8 +15,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import com.mentorship.entities.User;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -49,22 +47,25 @@ public class JwtUtils {
 		
 		CustomUserDetails userPrincipal =
 			    (CustomUserDetails) authentication.getPrincipal();
-		
-		List<String> authorities = getAuthoritiesInString(authentication.getAuthorities());
-		log.info("User authorities: {}", authorities);
-		log.info("User role from entity: {}", userPrincipal.getUser().getUserRole());
-	
-		
-		return Jwts.builder()
-				.subject(authentication.getName()) // email
+
+		var builder = Jwts.builder()
+				.subject(authentication.getName())
 				.issuedAt(new Date())
 				.expiration(new Date((new Date()).getTime() + jwtExpirationMs))
 				.claim("userId", userPrincipal.getUserId())
-				.claim("email", userPrincipal.getUsername()) // email
-				.claim("name", userPrincipal.getFullName()) // full name
-				.claim("authorities", authorities)
-				.signWith(key,Jwts.SIG.HS256)
-				.compact();
+				.claim("authorities", getAuthoritiesInString(authentication.getAuthorities()));
+		
+		// Add studentId if present
+		if (userPrincipal.getStudentId() != null) {
+			builder.claim("studentId", userPrincipal.getStudentId());
+		}
+		
+		// Add mentorId if present
+		if (userPrincipal.getMentorId() != null) {
+			builder.claim("mentorId", userPrincipal.getMentorId());
+		}
+		
+		return builder.signWith(key, Jwts.SIG.HS256).compact();
 	}
 	
 	//“Give me the login identifier stored in this token.”
