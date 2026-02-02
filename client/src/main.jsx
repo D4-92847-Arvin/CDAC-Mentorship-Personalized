@@ -4,11 +4,14 @@ import "./index.css";
 import App from "./App.jsx";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./API/AuthContext";
+import { DarkModeProvider } from "./context/DarkModeContext";
 
 createRoot(document.getElementById("root")).render(
   <BrowserRouter>
     <AuthProvider>
-      <App />
+      <DarkModeProvider>
+        <App />
+      </DarkModeProvider>
     </AuthProvider>
   </BrowserRouter>
 );

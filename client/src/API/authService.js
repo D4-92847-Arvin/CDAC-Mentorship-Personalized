@@ -14,7 +14,17 @@ export const loginUser = async (email, password) => {
     });
     return response.data;
   } catch (error) {
-    throw error.response?.data || {
+    // Handle 401 Unauthorized (invalid credentials)
+    if (error.response?.status === 401) {
+      throw {
+        message: "Invalid email or password. Please check and try again.",
+        status: 401,
+      };
+    }
+
+    // Handle other backend errors
+    const errorData = error.response?.data;
+    throw errorData || {
       message: error.message || "Login failed",
     };
   }

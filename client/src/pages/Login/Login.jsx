@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "./Login.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { loginUser, decodeToken } from "../../API/authService";
 import { useAuth } from "../../API/AuthContext";
+import ForgotPasswordModal from "../../Component/Profile/ForgotPasswordModal";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -10,6 +11,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [redirectRole, setRedirectRole] = useState(null);
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
 
   const navigate = useNavigate();
   const { setAuthToken, isAuthenticated } = useAuth();
@@ -78,15 +80,21 @@ const Login = () => {
       console.error("Login error:", err);
 
       // Display specific error messages from backend
-      if (err.message) {
-        setError(err.message);
-      } else if (err.errors) {
+      let errorMessage = "Invalid email or password. Please try again.";
+
+      // Check various error locations where backend might put the message
+      if (err?.message) {
+        errorMessage = err.message;
+      } else if (err?.data?.message) {
+        errorMessage = err.data.message;
+      } else if (err?.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err?.errors) {
         // Handle validation errors from backend
-        const errorMessages = Object.values(err.errors).join(", ");
-        setError(errorMessages);
-      } else {
-        setError("Invalid email or password. Please try again.");
+        errorMessage = Object.values(err.errors).join(", ");
       }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -104,9 +112,9 @@ const Login = () => {
       <div className="login-card shadow-lg">
 
         {/* Icon */}
-        <div className="login-icon-wrapper">
+        <Link to="/" className="login-icon-wrapper" style={{ textDecoration: 'none', cursor: 'pointer' }}>
           <div className="login-icon">🎓</div>
-        </div>
+        </Link>
 
         {/* Title */}
         <h1 className="login-title text-center">
@@ -145,8 +153,23 @@ const Login = () => {
           />
         </div>
 
-        {/* Error */}
-        {error && <p className="text-danger text-center">{error}</p>}
+        {/* Error with Forgot Password Link */}
+        {error && (
+          <div className="login-error-container">
+            <p className="text-danger">{error}</p>
+            {error.toLowerCase().includes("invalid") || 
+             error.toLowerCase().includes("password") ||
+             error.toLowerCase().includes("unauthorized") ? (
+              <button
+                type="button"
+                className="forgot-password-inline-link"
+                onClick={() => setIsForgotPasswordOpen(true)}
+              >
+                Forgot Password?
+              </button>
+            ) : null}
+          </div>
+        )}
 
         {/* Login Button */}
         <button
@@ -171,6 +194,10 @@ const Login = () => {
           </span>
         </div>
       </div>
+      <ForgotPasswordModal 
+        isOpen={isForgotPasswordOpen}
+        onClose={() => setIsForgotPasswordOpen(false)}
+      />
     </div>
   );
 };
