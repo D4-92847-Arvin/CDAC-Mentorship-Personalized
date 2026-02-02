@@ -7,7 +7,7 @@ const API_URL = "http://localhost:8080/api";
 export const getStudentId = () => {
   const token = localStorage.getItem("token");
   const studentId = localStorage.getItem("studentId");
-  
+
   if (!studentId && token) {
     // Try to decode JWT if studentId not stored
     try {
@@ -19,8 +19,28 @@ export const getStudentId = () => {
       return null;
     }
   }
-  
+
   return studentId ? parseInt(studentId) : null;
+};
+
+// Get mentor ID from localStorage (from JWT token)
+export const getMentorId = () => {
+  const token = localStorage.getItem("token");
+  const mentorId = localStorage.getItem("mentorId");
+
+  if (!mentorId && token) {
+    // Try to decode JWT if mentorId not stored
+    try {
+      const decoded = parseJwt(token);
+      // JWT has userId, not mentorId
+      return decoded?.mentorId || null;
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      return null;
+    }
+  }
+
+  return mentorId ? parseInt(mentorId) : null;
 };
 
 // Parse JWT token
@@ -32,7 +52,7 @@ const parseJwt = (token) => {
       atob(base64)
         .split("")
         .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-        .join("")
+        .join(""),
     );
     return JSON.parse(jsonPayload);
   } catch (error) {

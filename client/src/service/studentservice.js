@@ -32,6 +32,16 @@ export const cancelSession = (sessionId) => {
   return api.patch(`/api/student/sessions/${sessionId}/cancel`);
 };
 
+// Delete a session
+export const deleteSession = (sessionId) => {
+  return api.delete(`/api/student/sessions/${sessionId}`);
+};
+
+// Get active subscription for a student
+export const getActiveSubscription = (studentId) => {
+  return api.get(`/api/student/${studentId}/subscription/active`);
+};
+
 // Get verified mentors
 export const getVerifiedMentors = (domain = null) => {
   const params = domain ? { domain } : {};

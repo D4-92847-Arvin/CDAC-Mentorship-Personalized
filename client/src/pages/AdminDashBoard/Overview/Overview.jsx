@@ -65,6 +65,7 @@ const Overview = () => {
             chartData={chartData}
             activities={activities}
             refreshTrigger={refreshTrigger}
+            onNavigate={setActiveTab}
           />
         );
       case "verification":
@@ -85,6 +86,7 @@ const Overview = () => {
             chartData={chartData}
             activities={activities}
             refreshTrigger={refreshTrigger}
+            onNavigate={setActiveTab}
           />
         );
     }

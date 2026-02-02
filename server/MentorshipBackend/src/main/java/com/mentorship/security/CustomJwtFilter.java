@@ -32,6 +32,12 @@ public class CustomJwtFilter extends OncePerRequestFilter{
 			// TODO Auto-generated method stub
 			
 			String headerValue = request.getHeader("Authorization");
+
+			// SAFETY CHECK: If no header or doesn't start with Bearer, just continue to next filter
+			if (headerValue == null || !headerValue.startsWith("Bearer ")) {
+				filterChain.doFilter(request, response);
+				return;
+			}
 			
 			if(headerValue != null && headerValue.startsWith("Bearer ")) {
 				
@@ -71,7 +77,15 @@ public class CustomJwtFilter extends OncePerRequestFilter{
 			filterChain.doFilter(request, response);
 			
 		}
-		
-		
 	
+	// @Override
+	// protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+	// 	String path = request.getServletPath();
+	// 	return path.startsWith("/users/signin") || 
+	// 	       path.startsWith("/users/signup") || 
+	// 	       path.startsWith("/swagger-ui") || 
+	// 	       path.startsWith("/v3/api-docs") ||
+	// 	       path.startsWith("/v2/api-docs") ||
+	// 	       path.equals("/error");
+	// }
 }

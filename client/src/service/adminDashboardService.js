@@ -183,6 +183,21 @@ export const adminDashboardService = {
     }
   },
 
+  getTopStudents: async (limit = 5) => {
+    try {
+      const response = await api.get(
+        `${ADMIN_DASHBOARD_API}/leaderboards/students`,
+        {
+          params: { limit },
+        },
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching top students:", error);
+      throw error;
+    }
+  },
+
   getLongestActivityStreaks: async (limit = 4) => {
     try {
       const response = await api.get(
