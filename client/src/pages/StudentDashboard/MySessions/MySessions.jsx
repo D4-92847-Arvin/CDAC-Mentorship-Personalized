@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import "./MySessions.css";
-import { getStudentSessions, cancelSession } from "../../../services/studentService";
-import { getStudentId } from "../../../services/authService";
+import {
+  getStudentSessions,
+  cancelSession,
+} from "../../../service/studentService";
+import { getStudentId } from "../../../service/authService";
 import ScheduleSessionModal from "./ScheduleSessionModal";
 
 const MySessions = () => {
@@ -37,7 +40,9 @@ const MySessions = () => {
       sessions.forEach((session) => {
         // Construct a precise Date object for the session
         // session.sessionDate is YYYY-MM-DD, session.startTime is HH:MM:SS
-        const sessionDateTime = new Date(`${session.sessionDate}T${session.startTime}`);
+        const sessionDateTime = new Date(
+          `${session.sessionDate}T${session.startTime}`,
+        );
         const sessionDate = new Date(session.sessionDate);
 
         // Deterministic Zoom Link Generation (Frontend Only)
@@ -50,7 +55,10 @@ const MySessions = () => {
             hash = seed.charCodeAt(i) + ((hash << 5) - hash);
           }
           // Ensure 10-digit positive ID
-          const meetingId = Math.abs(hash).toString().slice(0, 10).padEnd(10, '0');
+          const meetingId = Math.abs(hash)
+            .toString()
+            .slice(0, 10)
+            .padEnd(10, "0");
           // Add a pseudo-random password based on the hash
           const pwd = Math.abs(hash).toString(36).slice(0, 6);
           return `https://zoom.us/j/${meetingId}?pwd=${pwd}`;
@@ -88,12 +96,8 @@ const MySessions = () => {
       });
 
       // Sort by date
-      upcoming.sort(
-        (a, b) => new Date(a.date) - new Date(b.date)
-      );
-      past.sort(
-        (a, b) => new Date(b.date) - new Date(a.date)
-      );
+      upcoming.sort((a, b) => new Date(a.date) - new Date(b.date));
+      past.sort((a, b) => new Date(b.date) - new Date(a.date));
 
       setUpcomingSessions(upcoming);
       setPastSessions(past);
@@ -160,7 +164,7 @@ const MySessions = () => {
   // Collect unique mentor IDs ONLY from UPCOMING active sessions
   // This matches the "Your Mentors" logic which only shows active mentors
   // Users must browse verified mentors to re-book past/completed mentors if they are no longer active
-  const filterMentorIds = [...new Set(upcomingSessions.map(s => s.mentorId))];
+  const filterMentorIds = [...new Set(upcomingSessions.map((s) => s.mentorId))];
 
   return (
     <div className="my-sessions-page">
@@ -184,20 +188,23 @@ const MySessions = () => {
       <div className="sessions-main-content">
         <div className="sessions-card">
           <div className="sessions-header">
-            <span>
-              Upcoming Sessions ({upcomingSessions.length})
-            </span>
+            <span>Upcoming Sessions ({upcomingSessions.length})</span>
             <button
               className="schedule-btn"
               onClick={() => setIsModalOpen(true)}
             >
-              <span role="img" aria-label="calendar">📅</span> Schedule New
+              <span role="img" aria-label="calendar">
+                📅
+              </span>{" "}
+              Schedule New
             </button>
           </div>
           {upcomingSessions.length === 0 ? (
             <div className="no-sessions">
               <p>No upcoming sessions scheduled</p>
-              <p className="text-muted">Book a session with a mentor to get started</p>
+              <p className="text-muted">
+                Book a session with a mentor to get started
+              </p>
             </div>
           ) : (
             upcomingSessions.map((session, idx) => (
@@ -230,28 +237,59 @@ const MySessions = () => {
                       onClick={() => handleCancelSession(session.sessionId)}
                       title="Cancel Session"
                     >
-                      <span role="img" aria-label="cancel">❌</span>
+                      <span role="img" aria-label="cancel">
+                        ❌
+                      </span>
                     </button>
                   </div>
                 </div>
                 {/* Display Zoom Link if available */}
-                {
-                  session.meetingUrl && (
-                    <div className="session-join-link" style={{ width: '100%', paddingTop: '8px', borderTop: '1px solid #e2e8f0', display: 'flex', alignItems: 'center' }}>
-                      <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#64748b', marginRight: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span role="img" aria-label="camera" style={{ fontSize: '16px' }}>🎥</span>
-                        Join Meeting:
-                      </span>
-                      <a
-                        href={session.meetingUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ color: '#2563eb', textDecoration: 'none', fontWeight: '600', fontSize: '14px' }}
+                {session.meetingUrl && (
+                  <div
+                    className="session-join-link"
+                    style={{
+                      width: "100%",
+                      paddingTop: "8px",
+                      borderTop: "1px solid #e2e8f0",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: "bold",
+                        color: "#64748b",
+                        marginRight: "8px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      <span
+                        role="img"
+                        aria-label="camera"
+                        style={{ fontSize: "16px" }}
                       >
-                        {session.meetingUrl}
-                      </a>
-                    </div>
-                  )}
+                        🎥
+                      </span>
+                      Join Meeting:
+                    </span>
+                    <a
+                      href={session.meetingUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        color: "#2563eb",
+                        textDecoration: "none",
+                        fontWeight: "600",
+                        fontSize: "14px",
+                      }}
+                    >
+                      {session.meetingUrl}
+                    </a>
+                  </div>
+                )}
               </div>
             ))
           )}
@@ -294,7 +332,7 @@ const MySessions = () => {
           )}
         </div>
       </div>
-    </div >
+    </div>
   );
 };
 

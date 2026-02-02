@@ -4,8 +4,8 @@ import {
   submitFeedback,
   getStudentFeedbacks,
   getStudentSessions,
-} from "../../../services/studentService";
-import { getStudentId } from "../../../services/authService";
+} from "../../../service/studentService";
+import { getStudentId } from "../../../service/authService";
 
 const feedbackOptions = [
   { label: "Communication", icon: "👍" },
@@ -48,7 +48,7 @@ const Feedback = () => {
       // Fetch both sessions and feedbacks
       const [sessionsResponse, feedbacksResponse] = await Promise.all([
         getStudentSessions(studentId),
-        getStudentFeedbacks(studentId)
+        getStudentFeedbacks(studentId),
       ]);
 
       const sessions = sessionsResponse.data || [];
@@ -58,12 +58,13 @@ const Feedback = () => {
 
       // Create a Set of session IDs that already have feedback
       const sessionsWithFeedback = new Set(
-        feedbacks.map(fb => fb.sessionId).filter(id => id != null)
+        feedbacks.map((fb) => fb.sessionId).filter((id) => id != null),
       );
 
       // Filter sessions: Must be COMPLETED and NOT in the feedback set
-      const completedAndAvailable = sessions.filter((s) =>
-        s.status === "COMPLETED" && !sessionsWithFeedback.has(s.sessionId)
+      const completedAndAvailable = sessions.filter(
+        (s) =>
+          s.status === "COMPLETED" && !sessionsWithFeedback.has(s.sessionId),
       );
 
       setCompletedSessions(completedAndAvailable);
@@ -80,7 +81,7 @@ const Feedback = () => {
     setSelectedOptions((prev) =>
       prev.includes(option)
         ? prev.filter((o) => o !== option)
-        : [...prev, option]
+        : [...prev, option],
     );
   };
 
@@ -138,7 +139,8 @@ const Feedback = () => {
     } catch (err) {
       console.error("Error submitting feedback:", err);
       setError(
-        err.response?.data?.message || "Failed to submit feedback. Please try again."
+        err.response?.data?.message ||
+          "Failed to submit feedback. Please try again.",
       );
     } finally {
       setSubmitting(false);
@@ -192,8 +194,9 @@ const Feedback = () => {
                 {completedSessions.map((session) => (
                   <button
                     key={session.sessionId}
-                    className={`session-option ${selectedSession === session.sessionId ? "selected" : ""
-                      }`}
+                    className={`session-option ${
+                      selectedSession === session.sessionId ? "selected" : ""
+                    }`}
                     onClick={() => handleSessionSelect(session.sessionId)}
                   >
                     <div className="session-option-title">{session.topic}</div>
@@ -214,7 +217,8 @@ const Feedback = () => {
                   <span
                     key={star}
                     className={
-                      "star" + (hover >= star || rating >= star ? " filled" : "")
+                      "star" +
+                      (hover >= star || rating >= star ? " filled" : "")
                     }
                     onMouseEnter={() => setHover(star)}
                     onMouseLeave={() => setHover(0)}
@@ -232,7 +236,9 @@ const Feedback = () => {
             </div>
 
             <div className="feedback-section">
-              <div className="feedback-label">Tell us about your experience</div>
+              <div className="feedback-label">
+                Tell us about your experience
+              </div>
               <textarea
                 className="feedback-textarea"
                 placeholder="Share your thoughts, suggestions, or any feedback about your mentorship sessions..."
@@ -240,9 +246,7 @@ const Feedback = () => {
                 onChange={(e) => setText(e.target.value)}
                 maxLength={500}
               />
-              <div className="char-count">
-                {text.length} / 500 characters
-              </div>
+              <div className="char-count">{text.length} / 500 characters</div>
             </div>
 
             <div className="feedback-section">
