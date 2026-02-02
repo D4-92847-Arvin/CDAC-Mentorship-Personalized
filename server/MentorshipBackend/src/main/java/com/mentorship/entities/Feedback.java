@@ -2,10 +2,6 @@ package com.mentorship.entities;
 
 import java.time.LocalDate;
 
-import com.mentorship.entities.BaseEntity;
-import com.mentorship.entities.Mentor;
-import com.mentorship.entities.Student;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -46,7 +42,7 @@ public class Feedback extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "session_id",
-                foreignKey = @ForeignKey(name = "fk_feedback_session"))
+                foreignKey = @ForeignKey(name = "fk_feedback_to_session"))
     private Session session;
 
     @Column(name = "rating", nullable = false)

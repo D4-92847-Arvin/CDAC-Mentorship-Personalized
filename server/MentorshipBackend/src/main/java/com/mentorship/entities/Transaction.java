@@ -1,6 +1,7 @@
 package com.mentorship.entities;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.mentorship.entities.BaseEntity;
 import com.mentorship.entities.Mentor;
@@ -68,6 +69,16 @@ public class Transaction extends BaseEntity {
     @Column(name = "transaction_reference", length = 100)
     private String transactionReference;
 
+    @Column(name = "transaction_id_external")
+    private String transactionIdExternal;
+
     @Column(name = "description", length = 255)
     private String description;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+    
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
 }

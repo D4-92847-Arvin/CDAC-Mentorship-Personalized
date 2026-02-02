@@ -1,6 +1,7 @@
 package com.mentorship.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,4 +59,22 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     // Calculate average per session
     @Query("SELECT COALESCE(AVG(t.amount), 0) FROM Transaction t WHERE t.mentor.mentorId = :mentorId AND t.paymentStatus = 'COMPLETED'")
     Double calculateAveragePerSession(@Param("mentorId") Long mentorId);
+
+    List<Transaction> findByPaymentStatus(String status);
+    
+    @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.paymentStatus = 'COMPLETED' AND YEAR(t.createdAt) = :year AND MONTH(t.createdAt) = :month")
+    Double getMonthlyRevenue(@Param("year") int year, @Param("month") int month);
+    
+    @Query("SELECT COUNT(t) FROM Transaction t WHERE t.paymentStatus = 'COMPLETED' AND YEAR(t.createdAt) = :year AND MONTH(t.createdAt) = :month")
+    long getMonthlyTransactionCount(@Param("year") int year, @Param("month") int month);
+    
+    @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.paymentStatus = 'COMPLETED'")
+    Double getTotalRevenue();
+    
+    @Query("SELECT COUNT(t) FROM Transaction t WHERE t.paymentStatus = 'COMPLETED'")
+    long getTotalTransactionCount();
+    
+    @Query("SELECT t FROM Transaction t WHERE t.paymentStatus = 'COMPLETED' AND t.createdAt >= :startDate AND t.createdAt <= :endDate")
+    List<Transaction> getTransactionsByDateRange(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
 }
