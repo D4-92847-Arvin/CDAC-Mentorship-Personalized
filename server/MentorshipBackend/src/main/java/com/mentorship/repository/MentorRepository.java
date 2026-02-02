@@ -19,4 +19,6 @@ public interface MentorRepository extends JpaRepository<Mentor, Long> {
     
     List<Mentor> findByVerificationStatusAndSpecializationContainingIgnoreCase(
         VerificationStatus status, String specialization);
+    
+    Optional<Mentor> findByUserDetails_UserId(Long userId);
 }

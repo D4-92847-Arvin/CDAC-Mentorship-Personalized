@@ -45,7 +45,13 @@ public class StudentController {
 	@Autowired
 	private MCQService mcqService;
 
-	// get student by id
+	// get student by user id (more specific, must come first)
+	@GetMapping("/user/{userId}")
+	public ResponseEntity<StudentDTO> getStudentByUserId(@PathVariable Long userId) {
+		return ResponseEntity.ok(studentService.getStudentByUserId(userId));
+	}
+
+	// get student by id (generic, must come after more specific paths)
 	@GetMapping("/{id}")
 	public ResponseEntity<StudentDTO> getStudent(@PathVariable Long id) {
 		return ResponseEntity.ok(studentService.getStudentById(id));

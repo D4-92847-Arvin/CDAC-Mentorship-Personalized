@@ -40,6 +40,7 @@ public interface StudentService {
     
     // Student CRUD Methods
     StudentDTO getStudentById(Long id);
+    StudentDTO getStudentByUserId(Long userId);  // Add this method
     List<StudentDTO> getAllStudents();
     StudentDTO createStudent(StudentDTO dto);
     StudentDTO updateStudent(Long id, StudentDTO dto);

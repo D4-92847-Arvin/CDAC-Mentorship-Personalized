@@ -35,6 +35,13 @@ function Sidebar() {
           </svg>
           <span>Dashboard</span>
         </NavLink>
+        <NavLink to="/mentor/profile" className={({isActive}) => `nav-item ${isActive ? 'active' : ''}`}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10z" />
+            <path d="M21 21a8 8 0 0 0-18 0" />
+          </svg>
+          <span>Profile</span>
+        </NavLink>
         <NavLink to="/mentor/availability" className={({isActive}) => `nav-item ${isActive ? 'active' : ''}`}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>

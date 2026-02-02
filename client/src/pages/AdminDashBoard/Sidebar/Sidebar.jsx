@@ -40,6 +40,12 @@ const Sidebar = ({ activeTab, onTabChange }) => {
           onClick={() => onTabChange("verification")}
         />
         <SidebarItem
+          label="Profile"
+          icon="👤"
+          isActive={activeTab === "profile"}
+          onClick={() => onTabChange("profile")}
+        />
+        <SidebarItem
           label="User Management"
           icon="👥"
           isActive={activeTab === "users"}

@@ -4,54 +4,23 @@ import axios from "axios";
 const API_URL = "http://localhost:8080/api";
 
 // Get student ID from localStorage (from JWT token)
-// Get student ID from localStorage (from JWT token)
 export const getStudentId = () => {
   const token = localStorage.getItem("token");
-  let studentId = localStorage.getItem("studentId");
-
-  // Handle "undefined" string case in local storage
-  if (studentId === "undefined" || studentId === "null") {
-    studentId = null;
-  }
-
+  const studentId = localStorage.getItem("studentId");
+  
   if (!studentId && token) {
     // Try to decode JWT if studentId not stored
     try {
       const decoded = parseJwt(token);
-      const id = decoded?.studentId || decoded?.sub;
-      return id ? parseInt(id) : null;
+      // JWT has userId, not studentId
+      return decoded?.userId || decoded?.studentId || null;
     } catch (error) {
       console.error("Error decoding token:", error);
       return null;
     }
   }
-
+  
   return studentId ? parseInt(studentId) : null;
-};
-
-// Get mentor ID from localStorage (from JWT token)
-export const getMentorId = () => {
-  const token = localStorage.getItem("token");
-  let mentorId = localStorage.getItem("mentorId");
-
-  // Handle "undefined" string case in local storage
-  if (mentorId === "undefined" || mentorId === "null") {
-    mentorId = null;
-  }
-
-  if (!mentorId && token) {
-    // Try to decode JWT if mentorId not stored
-    try {
-      const decoded = parseJwt(token);
-      const id = decoded?.mentorId;
-      return id ? parseInt(id) : null;
-    } catch (error) {
-      console.error("Error decoding token:", error);
-      return null;
-    }
-  }
-
-  return mentorId ? parseInt(mentorId) : null;
 };
 
 // Parse JWT token

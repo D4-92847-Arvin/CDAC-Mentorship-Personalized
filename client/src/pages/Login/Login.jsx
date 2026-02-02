@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "./Login.css";
-import { useNavigate } from "react-router-dom";
-import api from "../../service/api";
-import { toast } from "react-toastify";
+import { useNavigate, Link } from "react-router-dom";
+import { loginUser, decodeToken } from "../../API/authService";
 import { useAuth } from "../../API/AuthContext";
+import ForgotPasswordModal from "../../Component/Profile/ForgotPasswordModal";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -11,15 +11,15 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [redirectRole, setRedirectRole] = useState(null);
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
 
   const navigate = useNavigate();
   const { setAuthToken, isAuthenticated } = useAuth();
 
-  // Redirect after auth context updates
+  // Redirect after auth context is updated
   useEffect(() => {
     if (isAuthenticated && redirectRole) {
       console.log("Redirecting based on role:", redirectRole);
-
       if (redirectRole === "ROLE_STUDENT") {
         navigate("/student-dashboard");
       } else if (redirectRole === "ROLE_MENTOR") {
@@ -27,98 +27,80 @@ const Login = () => {
       } else if (redirectRole === "ROLE_ADMIN") {
         navigate("/admin-dashboard");
       }
-
       setRedirectRole(null);
     }
   }, [isAuthenticated, redirectRole, navigate]);
 
-  const decodeJWT = (token) => {
-    try {
-      const base64Url = token.split(".")[1];
-      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-      const jsonPayload = decodeURIComponent(
-        atob(base64)
-          .split("")
-          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-          .join(""),
-      );
-      return JSON.parse(jsonPayload);
-    } catch (err) {
-      console.error("JWT Decode Error:", err);
-      return null;
-    }
-  };
-
   const onLogin = async () => {
     try {
       setError("");
+      setLoading(true);
+
+      // Validate inputs
       if (!email || !password) {
-        toast.error("Please enter both email and password");
+        setError("Please enter both email and password");
+        setLoading(false);
         return;
       }
 
-      setLoading(true);
+      // Call auth service to login
+      const response = await loginUser(email, password);
+      const token = response.jwt;
 
-      // API call
-      const response = await api.post("/users/signin", {
-        email,
-        password,
-      });
+      // Store JWT token
+      localStorage.setItem("token", token);
 
-      if (response.data && response.data.jwt) {
-        const token = response.data.jwt;
+      // Decode JWT payload to get user roles
+      const payload = decodeToken(token);
+      const authorities = payload?.authorities || [];
 
-        // Store token
-        localStorage.setItem("authToken", token);
-        localStorage.setItem("user", email);
+      console.log("===== JWT DECODED =====");
+      console.log("Full Payload:", JSON.stringify(payload, null, 2));
+      console.log("Payload keys:", Object.keys(payload));
+      console.log("payload.sub:", payload?.sub);
+      console.log("payload.email:", payload?.email);
+      console.log("payload.name:", payload?.name);
+      console.log("payload.userId:", payload?.userId);
+      console.log("payload.authorities:", authorities);
+      console.log("========================");
 
-        // Update Auth Context
+      // Find the role (first ROLE_* authority, ignore other authorities like FACTOR_PASSWORD)
+      const userRole = authorities.find(auth => auth.startsWith("ROLE_"));
+      
+      if (userRole) {
+        // Update auth context with user data
         setAuthToken(token);
-
-        // Decode JWT
-        const payload = decodeJWT(token);
-        console.log("JWT Payload:", payload);
-
-        const authorities = payload?.authorities || [];
-        const userRole = authorities.find((auth) => auth.startsWith("ROLE_"));
-
-        // Store IDs
-        if (payload?.userId) {
-          localStorage.setItem("userId", payload.userId);
-        }
-
-        if (userRole === "ROLE_MENTOR" && payload?.mentorId) {
-          localStorage.setItem("mentorId", payload.mentorId);
-        }
-
-        if (userRole === "ROLE_STUDENT" && payload?.studentId) {
-          localStorage.setItem("studentId", payload.studentId);
-        }
-
-        if (!userRole) {
-          toast.error("No valid role assigned to this account");
-          localStorage.clear();
-          return;
-        }
-
-        localStorage.setItem("userRole", userRole);
-
-        toast.success("Login successful!");
+        // Set redirect role to trigger useEffect
         setRedirectRole(userRole);
+      } else {
+        setError("Your account does not have a valid role assigned");
+        localStorage.removeItem("token");
       }
     } catch (err) {
       console.error("Login error:", err);
-      toast.error(
-        err?.response?.data?.message ||
-          "Login failed. Please check your credentials.",
-      );
-      setError("Invalid email or password");
+
+      // Display specific error messages from backend
+      let errorMessage = "Invalid email or password. Please try again.";
+
+      // Check various error locations where backend might put the message
+      if (err?.message) {
+        errorMessage = err.message;
+      } else if (err?.data?.message) {
+        errorMessage = err.data.message;
+      } else if (err?.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err?.errors) {
+        // Handle validation errors from backend
+        errorMessage = Object.values(err.errors).join(", ");
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle Enter key
+  // Handle Enter key press
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
       onLogin();
@@ -128,10 +110,11 @@ const Login = () => {
   return (
     <div className="login-page d-flex align-items-center justify-content-center">
       <div className="login-card shadow-lg">
+
         {/* Icon */}
-        <div className="login-icon-wrapper">
+        <Link to="/" className="login-icon-wrapper" style={{ textDecoration: 'none', cursor: 'pointer' }}>
           <div className="login-icon">🎓</div>
-        </div>
+        </Link>
 
         {/* Title */}
         <h1 className="login-title text-center">
@@ -170,8 +153,23 @@ const Login = () => {
           />
         </div>
 
-        {/* Error */}
-        {error && <p className="text-danger text-center">{error}</p>}
+        {/* Error with Forgot Password Link */}
+        {error && (
+          <div className="login-error-container">
+            <p className="text-danger">{error}</p>
+            {error.toLowerCase().includes("invalid") || 
+             error.toLowerCase().includes("password") ||
+             error.toLowerCase().includes("unauthorized") ? (
+              <button
+                type="button"
+                className="forgot-password-inline-link"
+                onClick={() => setIsForgotPasswordOpen(true)}
+              >
+                Forgot Password?
+              </button>
+            ) : null}
+          </div>
+        )}
 
         {/* Login Button */}
         <button
@@ -196,6 +194,10 @@ const Login = () => {
           </span>
         </div>
       </div>
+      <ForgotPasswordModal 
+        isOpen={isForgotPasswordOpen}
+        onClose={() => setIsForgotPasswordOpen(false)}
+      />
     </div>
   );
 };

@@ -8,6 +8,7 @@ import UserManagementContent from "../UserManagement/UserManagementContent";
 import RevenueContent from "../Revenue/RevenueContent";
 import PerformanceLeaderboards from "../PerformanceLeaderBoard/PerformanceLeaderBoard";
 import RetentionChurn from "../RetentionChurn/RetentionChurn";
+import AdminProfile from "../AdminProfile";
 
 const Overview = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -76,6 +77,8 @@ const Overview = () => {
         return <PerformanceLeaderboards />;
       case "retention":
         return <RetentionChurn />;
+      case "profile":
+        return <AdminProfile />;
       default:
         return (
           <OverviewContent

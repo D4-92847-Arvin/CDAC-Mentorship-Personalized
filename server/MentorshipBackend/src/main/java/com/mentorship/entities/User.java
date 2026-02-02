@@ -45,6 +45,7 @@ public class User extends BaseEntity{
 	private String address;
 	
 	@Lob
+	@Column(columnDefinition = "LONGBLOB")
 	private byte[] image;
 	
 	@Column(name="phone_no",length=14, unique = true)

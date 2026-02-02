@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
 import Login from "./pages/Login/Login";
+import ResetPasswordPage from "./pages/ResetPassword/ResetPasswordPage";
 import Overview from "./pages/AdminDashBoard/Overview/Overview";
 import MentorRegister from "./pages/Register/MentorRegister";
 import StudentRegister from "./pages/Register/StudentRegister";
@@ -18,6 +19,7 @@ function App() {
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<PublicRoute element={<Login />} />} />
+        <Route path="/reset-password" element={<PublicRoute element={<ResetPasswordPage />} />} />
         <Route path="/mentors" element={<MentorListing />} />
         <Route path="/register/mentor" element={<PublicRoute element={<MentorRegister />} />} />
         <Route path="/register/student" element={<PublicRoute element={<StudentRegister />} />} />
