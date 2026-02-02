@@ -75,6 +75,15 @@ public class JwtUtils {
 		return claims.getSubject();
 	}
 	
+	public String getEmailFromJwtToken(String token) {
+	    return Jwts.parser()
+	               .verifyWith(key) // Use your existing key method
+	               .build()
+	               .parseSignedClaims(token)
+	               .getPayload()
+	               .getSubject();
+	}
+	
 	public Claims validateJwtToken(String jwtToken) {
 		
 		Claims claims =  Jwts.parser()
@@ -108,21 +117,23 @@ public class JwtUtils {
 		return authorities;
 	}
 	
-	public Authentication populateAuthenticationTokenFromJWT(String jwt) {
-		
-		Claims payloadClaims = validateJwtToken(jwt);
-		
-		String email = getUserNameFromJwtToken(payloadClaims);
-		
-		List<GrantedAuthority> authorities = getAuthoritiesFromClaims(payloadClaims);
-		
-		UsernamePasswordAuthenticationToken token = 
-				new UsernamePasswordAuthenticationToken(email,null, authorities);
-		
-		System.out.println("is authenticated" +token.isAuthenticated());
-		return token;
-		
-	}
+	/*
+	 * public Authentication populateAuthenticationTokenFromJWT(String jwt) {
+	 * 
+	 * Claims payloadClaims = validateJwtToken(jwt);
+	 * 
+	 * String email = getUserNameFromJwtToken(payloadClaims);
+	 * 
+	 * List<GrantedAuthority> authorities = getAuthoritiesFromClaims(payloadClaims);
+	 * 
+	 * UsernamePasswordAuthenticationToken token = new
+	 * UsernamePasswordAuthenticationToken(email,null, authorities);
+	 * 
+	 * System.out.println("is authenticated" +token.isAuthenticated()); return
+	 * token;
+	 * 
+	 * }
+	 */
 	
 	
 }
