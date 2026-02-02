@@ -1,48 +1,68 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./UserManagement.css";
+import { adminDashboardService } from "../../../service/adminDashboardService";
 
 const UserManagementContent = () => {
+  const [users, setUsers] = useState([]);
+  const [userStats, setUserStats] = useState({
+    totalUsers: 0,
+    activeUsers: 0,
+    newThisMonth: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [filterRole, setFilterRole] = useState("ALL");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
   });
 
-  const users = [
-    {
-      id: 1,
-      name: "Alice Cooper",
-      email: "alice@example.com",
-      role: "Mentor",
-      status: "Active",
-      joined: "Jan 15, 2024",
-    },
-    {
-      id: 2,
-      name: "Bob Martin",
-      email: "bob@example.com",
-      role: "Student",
-      status: "Active",
-      joined: "Feb 20, 2024",
-    },
-    {
-      id: 3,
-      name: "Carol White",
-      email: "carol@example.com",
-      role: "Mentor",
-      status: "Active",
-      joined: "Mar 10, 2024",
-    },
-    {
-      id: 4,
-      name: "David Lee",
-      email: "david@example.com",
-      role: "Student",
-      status: "Inactive",
-      joined: "Apr 5, 2024",
-    },
-  ];
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async (role = "ALL") => {
+    try {
+      setLoading(true);
+
+      let allUsers = [];
+      let stats = { totalUsers: 0, activeUsers: 0, newThisMonth: 0 };
+
+      try {
+        if (role === "ALL") {
+          allUsers = await adminDashboardService.getAllUsers();
+        } else {
+          allUsers = await adminDashboardService.getUsersByRole(role);
+        }
+      } catch (err) {
+        console.error("Error fetching users:", err);
+      }
+
+      try {
+        stats = await adminDashboardService.getUserStats();
+      } catch (err) {
+        console.error("Error fetching user stats:", err);
+      }
+
+      setUsers(allUsers || []);
+      setUserStats(stats || { totalUsers: 0, activeUsers: 0, newThisMonth: 0 });
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching user data:", err);
+      setError("Failed to load user data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFilterChange = (e) => {
+    const selectedRole = e.target.value;
+    setFilterRole(selectedRole);
+    fetchUserData(selectedRole);
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -54,11 +74,47 @@ const UserManagementContent = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Add your logic to save the mentor here
+    // Add logic to save new mentor
     console.log("New Mentor:", formData);
     setShowModal(false);
     setFormData({ name: "", email: "", password: "" });
+    fetchUserData();
   };
+
+  const handleDeleteUser = async (userId, userRole) => {
+    // Prevent deletion of students
+    if (userRole === "STUDENT") {
+      setError("Cannot delete student users");
+      return;
+    }
+
+    const roleText = userRole === "MENTOR" ? "Mentor" : "Admin";
+    if (
+      window.confirm(
+        `Are you sure you want to delete this ${roleText}? This action cannot be undone.`,
+      )
+    ) {
+      try {
+        await adminDashboardService.deleteUser(userId);
+        setSuccessMessage(`${roleText} deleted successfully`);
+        fetchUserData(filterRole);
+        setTimeout(() => setSuccessMessage(""), 3000);
+      } catch (err) {
+        console.error("Error deleting user:", err);
+        setError(err.response?.data?.error || `Failed to delete ${roleText}`);
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center py-5">
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -67,38 +123,71 @@ const UserManagementContent = () => {
         <p className="page-subtitle">Manage all users on the platform</p>
       </div>
 
+      {error && (
+        <div
+          className="alert alert-danger alert-dismissible fade show"
+          role="alert"
+        >
+          {error}
+          <button
+            type="button"
+            className="btn-close"
+            onClick={() => setError("")}
+          ></button>
+        </div>
+      )}
+
+      {successMessage && (
+        <div
+          className="alert alert-success alert-dismissible fade show"
+          role="alert"
+        >
+          {successMessage}
+          <button
+            type="button"
+            className="btn-close"
+            onClick={() => setSuccessMessage("")}
+          ></button>
+        </div>
+      )}
+
       {/* Summary cards */}
       <div className="row g-3 mb-4">
         <div className="col-12 col-md-4">
           <div className="summary-card h-100">
             <h6 className="text-muted mb-2 small">Total Users</h6>
-            <h3 className="summary-value">630</h3>
+            <h3 className="summary-value">{userStats.totalUsers}</h3>
           </div>
         </div>
         <div className="col-12 col-md-4">
           <div className="summary-card h-100">
             <h6 className="text-muted mb-2 small">Active Users</h6>
-            <h3 className="summary-value">594</h3>
+            <h3 className="summary-value">{userStats.activeUsers}</h3>
           </div>
         </div>
         <div className="col-12 col-md-4">
           <div className="summary-card h-100">
             <h6 className="text-muted mb-2 small">New This Month</h6>
-            <h3 className="summary-value">47</h3>
+            <h3 className="summary-value">{userStats.newThisMonth}</h3>
           </div>
         </div>
       </div>
 
       {/* Users table */}
       <div className="card-box">
-        <div className="d-flex justify-content-between align-items-center mb-3">
+        <div className="d-flex justify-content-between align-items-center mb-4">
           <h5 className="card-header-title mb-0">All Users</h5>
-          <button
-            className="btn btn-primary"
-            onClick={() => setShowModal(true)}
+          <select
+            className="form-select"
+            style={{ maxWidth: "200px" }}
+            value={filterRole}
+            onChange={handleFilterChange}
           >
-            Add Mentor
-          </button>
+            <option value="ALL">All Users</option>
+            <option value="STUDENT">Students</option>
+            <option value="MENTOR">Mentors</option>
+            <option value="ADMIN">Admins</option>
+          </select>
         </div>
 
         <div className="table-responsive">
@@ -115,26 +204,32 @@ const UserManagementContent = () => {
             </thead>
             <tbody>
               {users.map((user) => (
-                <tr key={user.id}>
+                <tr key={user.userId}>
                   <td className="fw-semibold">{user.name}</td>
                   <td className="text-muted">{user.email}</td>
                   <td>
                     <span
                       className={
                         "role-badge " +
-                        (user.role === "Mentor"
+                        (user.role === "MENTOR"
                           ? "role-mentor"
-                          : "role-student")
+                          : user.role === "ADMIN"
+                            ? "role-admin"
+                            : "role-student")
                       }
                     >
-                      {user.role}
+                      {user.role === "MENTOR"
+                        ? "Mentor"
+                        : user.role === "ADMIN"
+                          ? "Admin"
+                          : "Student"}
                     </span>
                   </td>
                   <td>
                     <span
                       className={
                         "status-badge " +
-                        (user.status === "Active"
+                        (user.status === "ACTIVE"
                           ? "status-active"
                           : "status-inactive")
                       }
@@ -142,12 +237,23 @@ const UserManagementContent = () => {
                       {user.status}
                     </span>
                   </td>
-                  <td className="text-muted">{user.joined}</td>
+                  <td className="text-muted">
+                    {new Date(user.joinedDate).toLocaleDateString()}
+                  </td>
                   <td>
-                    <button className="btn btn-sm btn-outline-primary me-2">
+                    {/* <button className="btn btn-sm btn-outline-primary me-2">
                       Edit
-                    </button>
-                    <button className="btn btn-sm btn-outline-danger">
+                    </button> */}
+                    <button
+                      className={`btn btn-sm ${user.role === "STUDENT" ? "btn-secondary disabled" : "btn-outline-danger"}`}
+                      onClick={() => handleDeleteUser(user.userId, user.role)}
+                      disabled={user.role === "STUDENT"}
+                      title={
+                        user.role === "STUDENT"
+                          ? "Cannot delete students"
+                          : "Delete user"
+                      }
+                    >
                       Delete
                     </button>
                   </td>

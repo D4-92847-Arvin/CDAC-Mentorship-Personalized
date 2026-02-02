@@ -1,7 +1,106 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./OverviewContent.css";
+import { adminDashboardService } from "../../../service/adminDashboardService";
 
-const OverviewContent = ({ chartData, activities }) => {
+const OverviewContent = ({ chartData, activities, refreshTrigger }) => {
+  const [stats, setStats] = useState(null);
+  const [growth, setGrowth] = useState(null);
+  const [activity, setActivity] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch each item individually with error handling
+        let overviewData = null;
+        let growthData = null;
+        let activityData = null;
+
+        try {
+          const response = await adminDashboardService.getOverviewStats();
+          console.log("Overview data received:", response);
+          overviewData = response;
+        } catch (err) {
+          console.error("Error fetching overview:", err);
+        }
+
+        try {
+          const response = await adminDashboardService.getPlatformGrowthData();
+          console.log("Growth data received:", response);
+          growthData = response;
+        } catch (err) {
+          console.error("Error fetching growth data:", err);
+        }
+
+        try {
+          const response = await adminDashboardService.getRecentActivity();
+          console.log("Activity data received:", response);
+          activityData = response;
+        } catch (err) {
+          console.error("Error fetching activity:", err);
+        }
+
+        // Only use real data if it was successfully fetched
+        if (overviewData) {
+          setStats(overviewData);
+        }
+        if (growthData) {
+          setGrowth(growthData);
+        }
+        if (activityData) {
+          setActivity(activityData);
+        }
+      } catch (err) {
+        console.error("Error loading dashboard data:", err);
+        setError("Failed to load dashboard data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [refreshTrigger]);
+
+  if (loading) {
+    return (
+      <div className="text-center py-5">
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Use real data from API if available, otherwise use fallback
+  const displayStats =
+    stats !== null
+      ? stats
+      : {
+          totalStudents: 580,
+          studentGrowthPercent: 12,
+          totalMentors: 50,
+          mentorGrowthPercent: 8,
+          activeSessions: 127,
+          sessionGrowthPercent: 15,
+          monthlyRevenue: 42500,
+          revenueGrowthPercent: 23,
+        };
+
+  const displayGrowth = growth && growth.length > 0 ? growth : chartData;
+  const displayActivity =
+    activity && activity.length > 0 ? activity : activities;
+
+  const formatCurrency = (value) => {
+    if (value >= 1000) {
+      return "₹" + (value / 1000).toFixed(1) + "K";
+    }
+    return "₹" + value.toFixed(0);
+  };
+
   return (
     <div>
       {/* Header */}
@@ -20,8 +119,10 @@ const OverviewContent = ({ chartData, activities }) => {
             <div className="d-flex justify-content-between align-items-start">
               <div>
                 <div className="text-muted small mb-1">Total Students</div>
-                <h3 className="metric-value">580</h3>
-                <span className="badge-pill badge-success">📈 +12%</span>
+                <h3 className="metric-value">{displayStats.totalStudents}</h3>
+                <span className="badge-pill badge-success">
+                  📈 +{displayStats.studentGrowthPercent?.toFixed(1)}%
+                </span>
               </div>
               <div className="metric-icon bg-students">
                 <span>👥</span>
@@ -36,8 +137,10 @@ const OverviewContent = ({ chartData, activities }) => {
             <div className="d-flex justify-content-between align-items-start">
               <div>
                 <div className="text-muted small mb-1">Total Mentors</div>
-                <h3 className="metric-value">50</h3>
-                <span className="badge-pill badge-success">📈 +8%</span>
+                <h3 className="metric-value">{displayStats.totalMentors}</h3>
+                <span className="badge-pill badge-success">
+                  📈 +{displayStats.mentorGrowthPercent?.toFixed(1)}%
+                </span>
               </div>
               <div className="metric-icon bg-mentors">
                 <span>👤</span>
@@ -52,8 +155,10 @@ const OverviewContent = ({ chartData, activities }) => {
             <div className="d-flex justify-content-between align-items-start">
               <div>
                 <div className="text-muted small mb-1">Active Sessions</div>
-                <h3 className="metric-value">127</h3>
-                <span className="badge-pill badge-success">📈 +15%</span>
+                <h3 className="metric-value">{displayStats.activeSessions}</h3>
+                <span className="badge-pill badge-success">
+                  📈 +{displayStats.sessionGrowthPercent?.toFixed(1)}%
+                </span>
               </div>
               <div className="metric-icon bg-sessions">
                 <span>📈</span>
@@ -68,8 +173,12 @@ const OverviewContent = ({ chartData, activities }) => {
             <div className="d-flex justify-content-between align-items-start">
               <div>
                 <div className="text-muted small mb-1">Monthly Revenue</div>
-                <h3 className="metric-value">₹42.5K</h3>
-                <span className="badge-pill badge-success">📈 +23%</span>
+                <h3 className="metric-value">
+                  {formatCurrency(displayStats.monthlyRevenue)}
+                </h3>
+                <span className="badge-pill badge-success">
+                  📈 +{displayStats.revenueGrowthPercent?.toFixed(1)}%
+                </span>
               </div>
               <div className="metric-icon bg-revenue">
                 <span>💲</span>
@@ -120,17 +229,17 @@ const OverviewContent = ({ chartData, activities }) => {
               ))}
 
               <polyline
-                points={chartData
+                points={displayGrowth
                   .map(
                     (d, i) =>
-                      `${100 + i * 120},${340 - (d.students / 600) * 280}`
+                      `${100 + i * 120},${340 - (d.students / 600) * 280}`,
                   )
                   .join(" ")}
                 fill="none"
                 stroke="#2563eb"
                 strokeWidth="3"
               />
-              {chartData.map((d, i) => (
+              {displayGrowth.map((d, i) => (
                 <circle
                   key={i}
                   cx={100 + i * 120}
@@ -141,17 +250,17 @@ const OverviewContent = ({ chartData, activities }) => {
               ))}
 
               <polyline
-                points={chartData
+                points={displayGrowth
                   .map(
                     (d, i) =>
-                      `${100 + i * 120},${340 - (d.mentors / 600) * 280}`
+                      `${100 + i * 120},${340 - (d.mentors / 600) * 280}`,
                   )
                   .join(" ")}
                 fill="none"
                 stroke="#14b8a6"
                 strokeWidth="3"
               />
-              {chartData.map((d, i) => (
+              {displayGrowth.map((d, i) => (
                 <circle
                   key={i}
                   cx={100 + i * 120}
@@ -169,21 +278,25 @@ const OverviewContent = ({ chartData, activities }) => {
           <div className="custom-card h-100">
             <h5 className="card-header-title mb-3">Recent Activity</h5>
 
-            {activities.map((activity, index) => (
+            {displayActivity.map((activityItem, index) => (
               <div key={index} className="activity-item">
                 <div className="d-flex align-items-center">
                   <div
                     className="activity-icon"
-                    style={{ backgroundColor: activity.bg }}
+                    style={{ backgroundColor: "#3b5998" }}
                   >
-                    {activity.icon}
+                    {activityItem.activityType === "MENTOR_APPROVED" && "👤"}
+                    {activityItem.activityType === "STUDENT_REGISTERED" && "👥"}
+                    {activityItem.activityType === "REVENUE_MILESTONE" && "₹"}
                   </div>
                   <div>
-                    <div className="activity-title">{activity.title}</div>
-                    <div className="activity-subtitle">{activity.subtitle}</div>
+                    <div className="activity-title">{activityItem.title}</div>
+                    <div className="activity-subtitle">
+                      {activityItem.description}
+                    </div>
                   </div>
                 </div>
-                <div className="activity-time">{activity.time}</div>
+                <div className="activity-time">{activityItem.timeAgo}</div>
               </div>
             ))}
           </div>

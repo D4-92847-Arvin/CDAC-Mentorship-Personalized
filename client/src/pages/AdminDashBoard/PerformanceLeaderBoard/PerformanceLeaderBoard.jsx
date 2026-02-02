@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./PerformanceLeaderboards.css";
+import { adminDashboardService } from "../../../service/adminDashboardService";
 
 const TopListItem = ({
   idx,
@@ -23,49 +24,56 @@ const TopListItem = ({
 );
 
 export const PerformanceLeaderboards = () => {
-  const topMentors = [
-    {
-      id: 1,
-      name: "Dr. Sarah Mitchell",
-      rating: 4.9,
-      sessions: 156,
-      students: 42,
-      badge: "🥇",
-    },
-    {
-      id: 2,
-      name: "Prof. James Wilson",
-      rating: 4.8,
-      sessions: 142,
-      students: 38,
-      badge: "🥈",
-    },
-    {
-      id: 3,
-      name: "Dr. Emily Chen",
-      rating: 4.8,
-      sessions: 128,
-      students: 35,
-      badge: "🥉",
-    },
-    {
-      id: 4,
-      name: "Dr. Michael Brown",
-      rating: 4.7,
-      sessions: 115,
-      students: 32,
-      badge: "",
-    },
-    {
-      id: 5,
-      name: "Prof. Lisa Anderson",
-      rating: 4.7,
-      sessions: 108,
-      students: 29,
-      badge: "",
-    },
-  ];
+  const [topMentors, setTopMentors] = useState([]);
+  const [longestStreaks, setLongestStreaks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  useEffect(() => {
+    fetchLeaderboardData();
+  }, []);
+
+  const fetchLeaderboardData = async () => {
+    try {
+      setLoading(true);
+
+      let mentorsData = [];
+      let streaksData = [];
+
+      try {
+        mentorsData = await adminDashboardService.getTopMentors(5);
+      } catch (err) {
+        console.error("Error fetching top mentors:", err);
+      }
+
+      try {
+        streaksData = await adminDashboardService.getLongestActivityStreaks(4);
+      } catch (err) {
+        console.error("Error fetching activity streaks:", err);
+      }
+
+      setTopMentors(mentorsData || []);
+      setLongestStreaks(streaksData || []);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching leaderboard data:", err);
+      setError("Failed to load leaderboard data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center py-5">
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Default data for students (you can add getTopStudents endpoint if needed)
   const topStudents = [
     {
       id: 1,
@@ -109,43 +117,26 @@ export const PerformanceLeaderboards = () => {
     },
   ];
 
-  const longestStreaks = [
-    {
-      id: 1,
-      name: "Dr. Sarah Mitchell",
-      streak: 42,
-      type: "Mentor",
-      lastActive: "Today",
-    },
-    {
-      id: 2,
-      name: "Alex Thompson",
-      streak: 38,
-      type: "Student",
-      lastActive: "Today",
-    },
-    {
-      id: 3,
-      name: "Prof. James Wilson",
-      streak: 35,
-      type: "Mentor",
-      lastActive: "Today",
-    },
-    {
-      id: 4,
-      name: "Maria Garcia",
-      streak: 32,
-      type: "Student",
-      lastActive: "1 day ago",
-    },
-  ];
-
   return (
     <section className="pl-root p-4">
       <div className="pl-header mb-4">
         <h2 className="pl-title">Performance Leaderboards</h2>
         <p className="pl-subtitle">Top performers and active contributors</p>
       </div>
+
+      {error && (
+        <div
+          className="alert alert-warning alert-dismissible fade show"
+          role="alert"
+        >
+          {error}
+          <button
+            type="button"
+            className="btn-close"
+            onClick={() => setError("")}
+          ></button>
+        </div>
+      )}
 
       <div className="row g-3">
         {/* Top Mentors */}
@@ -154,22 +145,28 @@ export const PerformanceLeaderboards = () => {
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <h5 className="card-heading">🏆 Top Rated Mentors</h5>
-                <span className="text-muted small">This Month</span>
+                <span className="text-muted small">By Rating</span>
               </div>
 
               <div className="pl-list">
-                {topMentors.map((m, i) => (
-                  <TopListItem
-                    key={m.id}
-                    idx={i}
-                    title={m.badge || `#${i + 1}`}
-                    subtitle={m.name}
-                    meta={`${m.sessions} sessions • ${m.students} students`}
-                    score={m.rating}
-                    highlight={i < 3}
-                    scoreClass="pl-score--yellow"
-                  />
-                ))}
+                {topMentors.length > 0 ? (
+                  topMentors.map((m, i) => (
+                    <TopListItem
+                      key={m.mentorId || i}
+                      idx={i}
+                      title={i < 3 ? ["🥇", "🥈", "🥉"][i] : `#${i + 1}`}
+                      subtitle={m.name || "Unknown"}
+                      meta=""
+                      score={(m.rating || 0).toFixed(1)}
+                      highlight={i < 3}
+                      scoreClass="pl-score--yellow"
+                    />
+                  ))
+                ) : (
+                  <div className="text-center text-muted py-4">
+                    No mentor data available
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -181,7 +178,7 @@ export const PerformanceLeaderboards = () => {
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <h5 className="card-heading">⭐ Most Active Students</h5>
-                <span className="text-muted small">This Month</span>
+                <span className="text-muted small">By Sessions</span>
               </div>
 
               <div className="pl-list">
@@ -191,7 +188,7 @@ export const PerformanceLeaderboards = () => {
                     idx={i}
                     title={s.badge || `#${i + 1}`}
                     subtitle={s.name}
-                    meta={`${s.completed} sessions • ${s.hours}h total`}
+                    meta=""
                     score={s.rating}
                     highlight={i < 3}
                     scoreClass="pl-score--blue"
@@ -212,26 +209,39 @@ export const PerformanceLeaderboards = () => {
               </div>
 
               <div className="row g-3">
-                {longestStreaks.map((item) => (
-                  <div key={item.id} className="col-md-3">
-                    <div className="streak-card">
-                      <div className="streak-value">{item.streak}</div>
-                      <div className="streak-name">{item.name}</div>
-                      <div
-                        className={`streak-type ${
-                          item.type === "Mentor"
-                            ? "type-mentor"
-                            : "type-student"
-                        }`}
-                      >
-                        {item.type}
-                      </div>
-                      <div className="streak-last text-muted">
-                        {item.lastActive}
+                {longestStreaks.length > 0 ? (
+                  longestStreaks.map((item, index) => (
+                    <div
+                      key={item.activityStreakId || item.userId || index}
+                      className="col-md-3"
+                    >
+                      <div className="streak-card">
+                        <div className="streak-value">
+                          {item.streakDays || item.streak || 0}
+                        </div>
+                        <div className="streak-name">
+                          {item.userName || item.name || "Unknown"}
+                        </div>
+                        <div
+                          className={`streak-type ${
+                            item.userType === "MENTOR" || item.type === "Mentor"
+                              ? "type-mentor"
+                              : "type-student"
+                          }`}
+                        >
+                          {item.userType || item.type || "User"}
+                        </div>
+                        <div className="streak-last text-muted">
+                          {item.lastActiveDate || item.lastActive || "Recently"}
+                        </div>
                       </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="col-12 text-center text-muted py-4">
+                    No streak data available
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>

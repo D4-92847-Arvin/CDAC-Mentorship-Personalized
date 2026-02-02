@@ -34,6 +34,11 @@
   color: #1e40af;
 }
 
+.role-admin {
+  background: #e9d5ff;
+  color: #6b21a8;
+}
+
 .role-student {
   background: #fef3c7;
   color: #92400e;
