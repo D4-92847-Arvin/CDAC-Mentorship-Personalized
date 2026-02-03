@@ -73,20 +73,20 @@ public class StudentServiceImpl implements StudentService {
     public SessionDTO getNextSession(Long studentId) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found with id: " + studentId));
-        
+
         LocalDate today = LocalDate.now();
         LocalTime currentTime = LocalTime.now();
-        
+
         // Find upcoming sessions
         List<Session> upcomingSessions = sessionRepository.findUpcomingSessionsForStudent(student, today, currentTime);
-        
+
         if (upcomingSessions.isEmpty()) {
             return null;
         }
-        
+
         // Get the first (nearest) upcoming session
         Session nextSession = upcomingSessions.get(0);
-        
+
         return nextSession != null ? convertToDTO(nextSession) : null;
     }
 
@@ -94,12 +94,12 @@ public class StudentServiceImpl implements StudentService {
     public List<SessionDTO> getUpcomingSessions(Long studentId) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found with id: " + studentId));
-        
+
         LocalDate today = LocalDate.now();
         LocalTime currentTime = LocalTime.now();
-        
+
         List<Session> upcomingSessions = sessionRepository.findUpcomingSessionsForStudent(student, today, currentTime);
-        
+
         return upcomingSessions.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -109,12 +109,12 @@ public class StudentServiceImpl implements StudentService {
     public List<SessionDTO> getPastSessions(Long studentId) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found with id: " + studentId));
-        
+
         LocalDate today = LocalDate.now();
         LocalTime currentTime = LocalTime.now();
-        
+
         List<Session> pastSessions = sessionRepository.findPastSessionsForStudent(student, today, currentTime);
-        
+
         return pastSessions.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -123,14 +123,15 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public DayAvailabilityDTO getMentorAvailableSlots(Long mentorId, LocalDate date) {
         // Get all availability slots for this mentor and date
-        List<MentorAvailability> availabilities = availabilityRepository.findByMentor_MentorIdAndAvailableDate(mentorId, date);
-        
+        List<MentorAvailability> availabilities = availabilityRepository.findByMentor_MentorIdAndAvailableDate(mentorId,
+                date);
+
         // Filter to only show available slots (not booked and not blocked)
         List<TimeSlotDTO> availableSlots = availabilities.stream()
                 .filter(a -> a.getIsAvailable() && !a.getIsBooked() && !a.getIsBlocked())
                 .map(this::convertToTimeSlotDTO)
                 .collect(Collectors.toList());
-        
+
         return DayAvailabilityDTO.builder()
                 .date(date)
                 .timeSlots(availableSlots)
@@ -141,7 +142,7 @@ public class StudentServiceImpl implements StudentService {
     public List<DayAvailabilityDTO> getMentorAvailableSlots(Long mentorId, LocalDate startDate, LocalDate endDate) {
         List<MentorAvailability> availabilities = availabilityRepository
                 .findByMentorAndDateRange(mentorId, startDate, endDate);
-        
+
         // Group by date and filter available slots
         return availabilities.stream()
                 .filter(a -> a.getIsAvailable() && !a.getIsBooked() && !a.getIsBlocked())
@@ -161,13 +162,14 @@ public class StudentServiceImpl implements StudentService {
     public List<SessionDTO> getAllSessions(Long studentId) {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found with id: " + studentId));
-        
+
         List<Session> sessions = sessionRepository.findByStudent(student);
-        
+
         return sessions.stream()
                 .sorted((s1, s2) -> {
                     int dateCompare = s2.getSessionDate().compareTo(s1.getSessionDate());
-                    if (dateCompare != 0) return dateCompare;
+                    if (dateCompare != 0)
+                        return dateCompare;
                     return s2.getStartTime().compareTo(s1.getStartTime());
                 })
                 .map(this::convertToDTO)
@@ -179,8 +181,8 @@ public class StudentServiceImpl implements StudentService {
                 .sessionId(session.getSessionId())
                 .mentorId(session.getMentor().getMentorId())
                 .studentId(session.getStudent().getStudentId())
-                .studentName(session.getStudent().getUserDetails().getFirstName() + " " + 
-                          session.getStudent().getUserDetails().getLastName())
+                .studentName(session.getStudent().getUserDetails().getFirstName() + " " +
+                        session.getStudent().getUserDetails().getLastName())
                 .sessionDate(session.getSessionDate())
                 .startTime(session.getStartTime())
                 .endTime(session.getEndTime())
@@ -192,11 +194,11 @@ public class StudentServiceImpl implements StudentService {
 
     private TimeSlotDTO convertToTimeSlotDTO(MentorAvailability availability) {
         LocalTime time = availability.getTimeSlot();
-        String displayTime = String.format("%02d:%02d %s", 
+        String displayTime = String.format("%02d:%02d %s",
                 time.getHour() > 12 ? time.getHour() - 12 : (time.getHour() == 0 ? 12 : time.getHour()),
                 time.getMinute(),
                 time.getHour() >= 12 ? "PM" : "AM");
-        
+
         return TimeSlotDTO.builder()
                 .timeSlot(time)
                 .displayTime(displayTime)
@@ -303,13 +305,16 @@ public class StudentServiceImpl implements StudentService {
             Student student = studentRepository.findById(studentId)
                     .orElseThrow(() -> new RuntimeException("Student not found"));
 
-            boolean hasActiveSubscription = !studentSubscriptionRepository
-                    .findActiveSubscription(studentId)
-                    .isEmpty();
-
-            if (!hasActiveSubscription) {
-                throw new RuntimeException("Active subscription required to browse mentors.");
-            }
+            /*
+             * boolean hasActiveSubscription = !studentSubscriptionRepository
+             * .findActiveSubscription(studentId)
+             * .isEmpty();
+             * 
+             * if (!hasActiveSubscription) {
+             * throw new
+             * RuntimeException("Active subscription required to browse mentors.");
+             * }
+             */
 
             List<Mentor> mentors;
             if (domain == null || domain.isEmpty()) {
@@ -380,24 +385,25 @@ public class StudentServiceImpl implements StudentService {
         // Validate that the requested date and time slot is available
         LocalDate sessionDate = dto.getSessionDate();
         LocalTime startTime = dto.getStartTime();
-        
+
         if (sessionDate == null || startTime == null) {
             throw new RuntimeException("Session date and start time are required");
         }
-        
+
         // Check if mentor has marked this time slot as available
         MentorAvailability availability = availabilityRepository
                 .findByMentor_MentorIdAndAvailableDateAndTimeSlot(mentor.getMentorId(), sessionDate, startTime)
-                .orElseThrow(() -> new RuntimeException("This time slot is not available. Please choose from mentor's available slots."));
-        
+                .orElseThrow(() -> new RuntimeException(
+                        "This time slot is not available. Please choose from mentor's available slots."));
+
         // Check if the slot is available and not already booked
         if (!availability.getIsAvailable() || availability.getIsBooked() || availability.getIsBlocked()) {
             throw new RuntimeException("This time slot is not available for booking. Please choose another slot.");
         }
-        
+
         // Automatically calculate end time as 1 hour from start time
         LocalTime endTime = startTime.plusHours(1);
-        
+
         // Create or update mentor-student relationship
         if (!mentorStudentRepository.existsByMentor_MentorIdAndStudent_StudentId(mentor.getMentorId(), studentId)) {
             MentorStudent mentorStudent = new MentorStudent();
@@ -421,7 +427,7 @@ public class StudentServiceImpl implements StudentService {
         session.setStatus(SessionStatus.PAYMENT_PENDING);
         session.setSessionFee(mentor.getRatePerSession());
         sessionRepository.save(session);
-        
+
         // Mark the availability slot as booked
         availability.setIsBooked(true);
         availability.setIsAvailable(false);
@@ -461,7 +467,8 @@ public class StudentServiceImpl implements StudentService {
             transaction.setPaymentStatus(PaymentStatus.COMPLETED);
             transaction.setPaymentMethod(PaymentMethod.UPI);
             transaction.setTransactionReference(dto.getTransactionId());
-            transaction.setDescription("Payment for session on " + session.getSessionDate() + " at " + session.getStartTime());
+            transaction.setDescription(
+                    "Payment for session on " + session.getSessionDate() + " at " + session.getStartTime());
             transactionRepository.save(transaction);
         } else {
             session.setStatus(SessionStatus.PAYMENT_FAILED);
@@ -472,7 +479,7 @@ public class StudentServiceImpl implements StudentService {
     public List<StudentSessionResponseDTO> getStudentSessions(Long studentId) {
         // Auto-complete expired sessions using centralized logic
         sessionService.updateExpiredSessions();
-        
+
         List<Session> sessions = sessionRepository.findByStudent_StudentId(studentId);
 
         return sessions.stream().map(s -> {
@@ -514,11 +521,11 @@ public class StudentServiceImpl implements StudentService {
         // Release the booked time slot back to available
         MentorAvailability availability = availabilityRepository
                 .findByMentor_MentorIdAndAvailableDateAndTimeSlot(
-                    session.getMentor().getMentorId(), 
-                    session.getSessionDate(), 
-                    session.getStartTime())
+                        session.getMentor().getMentorId(),
+                        session.getSessionDate(),
+                        session.getStartTime())
                 .orElse(null);
-        
+
         if (availability != null && availability.getIsBooked()) {
             availability.setIsBooked(false);
             availability.setIsAvailable(true);
@@ -532,21 +539,22 @@ public class StudentServiceImpl implements StudentService {
     public void deleteSession(Long sessionId) {
         Session session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new RuntimeException("Session not found"));
-        
-        // Release the booked time slot back to available when deleting a pending session
+
+        // Release the booked time slot back to available when deleting a pending
+        // session
         MentorAvailability availability = availabilityRepository
                 .findByMentor_MentorIdAndAvailableDateAndTimeSlot(
-                    session.getMentor().getMentorId(), 
-                    session.getSessionDate(), 
-                    session.getStartTime())
+                        session.getMentor().getMentorId(),
+                        session.getSessionDate(),
+                        session.getStartTime())
                 .orElse(null);
-        
+
         if (availability != null && availability.getIsBooked()) {
             availability.setIsBooked(false);
             availability.setIsAvailable(true);
             availabilityRepository.save(availability);
         }
-        
+
         sessionRepository.delete(session);
     }
 
@@ -657,5 +665,4 @@ public class StudentServiceImpl implements StudentService {
         return sessions;
     }
 
-	
 }

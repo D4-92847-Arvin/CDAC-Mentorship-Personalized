@@ -27,3 +27,7 @@ export const getProfileImageByUserId = (userId) => {
     responseType: 'blob'
   });
 };
+// Get user's own profile details
+export const getMyProfileDetails = () => {
+  return api.get(`/users/me`);
+};

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\CDAC_SUNBEAM\\Project_with_.net\\CDAC-Mentorship-Personalized\\PaymentService\\PaymentService.csproj": {}
+    "D:\\Mentorship_Personalize_Original\\CDAC-Mentorship-Personalized\\PaymentService\\PaymentService.csproj": {}
   },
   "projects": {
-    "D:\\CDAC_SUNBEAM\\Project_with_.net\\CDAC-Mentorship-Personalized\\PaymentService\\PaymentService.csproj": {
+    "D:\\Mentorship_Personalize_Original\\CDAC-Mentorship-Personalized\\PaymentService\\PaymentService.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\CDAC_SUNBEAM\\Project_with_.net\\CDAC-Mentorship-Personalized\\PaymentService\\PaymentService.csproj",
+        "projectUniqueName": "D:\\Mentorship_Personalize_Original\\CDAC-Mentorship-Personalized\\PaymentService\\PaymentService.csproj",
         "projectName": "PaymentService",
-        "projectPath": "D:\\CDAC_SUNBEAM\\Project_with_.net\\CDAC-Mentorship-Personalized\\PaymentService\\PaymentService.csproj",
+        "projectPath": "D:\\Mentorship_Personalize_Original\\CDAC-Mentorship-Personalized\\PaymentService\\PaymentService.csproj",
         "packagesPath": "C:\\Users\\Lenovo\\.nuget\\packages\\",
-        "outputPath": "D:\\CDAC_SUNBEAM\\Project_with_.net\\CDAC-Mentorship-Personalized\\PaymentService\\obj\\",
+        "outputPath": "D:\\Mentorship_Personalize_Original\\CDAC-Mentorship-Personalized\\PaymentService\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Lenovo\\AppData\\Roaming\\NuGet\\NuGet.Config",

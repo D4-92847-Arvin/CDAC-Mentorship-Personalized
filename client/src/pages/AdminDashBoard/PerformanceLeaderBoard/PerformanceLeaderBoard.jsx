@@ -194,11 +194,10 @@ export const PerformanceLeaderboards = () => {
                           {item.userName || item.name || "Unknown"}
                         </div>
                         <div
-                          className={`streak-type ${
-                            item.userType === "MENTOR" || item.type === "Mentor"
+                          className={`streak-type ${item.userType === "MENTOR" || item.type === "Mentor" || item.type === "MENTOR"
                               ? "type-mentor"
                               : "type-student"
-                          }`}
+                            }`}
                         >
                           {item.userType || item.type || "User"}
                         </div>

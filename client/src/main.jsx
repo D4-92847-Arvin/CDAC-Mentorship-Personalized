@@ -6,12 +6,16 @@ import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./API/AuthContext";
 import { DarkModeProvider } from "./context/DarkModeContext";
 
+import ErrorBoundary from "./ErrorBoundary";
+
 createRoot(document.getElementById("root")).render(
-  <BrowserRouter>
-    <AuthProvider>
-      <DarkModeProvider>
-        <App />
-      </DarkModeProvider>
-    </AuthProvider>
-  </BrowserRouter>
+  <ErrorBoundary>
+    <BrowserRouter>
+      <AuthProvider>
+        <DarkModeProvider>
+          <App />
+        </DarkModeProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  </ErrorBoundary>
 );

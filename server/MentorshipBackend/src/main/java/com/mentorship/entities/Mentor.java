@@ -24,63 +24,59 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-
 @Entity
 @Table(name = "mentors")
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString(callSuper=true, exclude= {"userDetails"})
-public class Mentor extends BaseEntity{
-	
-	@Id //PK constraint
+@ToString(callSuper = true, exclude = { "userDetails" })
+public class Mentor extends BaseEntity {
+
+	@Id // PK constraint
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long mentorId;
-	
-	@OneToOne(optional = false,cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id",nullable = false,unique = true,
-            foreignKey = @ForeignKey(name = "fk_mentor_user"))
+
+	@OneToOne(optional = false, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id", nullable = false, unique = true, foreignKey = @ForeignKey(name = "fk_mentor_user"))
 	private User userDetails;
-	
-	@Column(name="specialization",length = 100)
+
+	@Column(name = "specialization", length = 100)
 	private String specialization;
-	
-	@Column(name="experience",length = 80)
+
+	@Column(name = "experience", length = 80)
 	private String experience;
-	
-	@Column(name="rate_per_session")
+
+	@Column(name = "rate_per_session")
 	private double ratePerSession;
-	
-	@Column(name="discount_percent")
+
+	@Column(name = "discount_percent")
 	private double discountPercent;
-	
-	@Column(name="is_deleted")
-	private boolean deleted = false;
-	
+
+	@Column(name = "is_deleted")
+	private Boolean deleted = false;
+
 	@Enumerated(EnumType.STRING)
-	@Column(name="verification_status",length = 20)
+	@Column(name = "verification_status", length = 20)
 	private VerificationStatus verificationStatus;
-	
-	
-	@ManyToOne(fetch = FetchType.LAZY) 
-	@JoinColumn( name = "verified_by", foreignKey = @ForeignKey(name ="fk_mentor_verified_by")) 
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "verified_by", foreignKey = @ForeignKey(name = "fk_mentor_verified_by"))
 	private User verifiedBy;
-	
-	
-	//new fields added
+
+	// new fields added
 	@Column(name = "highest_education", nullable = false, length = 100)
-    private String highestEducation;
-	
+	private String highestEducation;
+
 	@Column(name = "current_position", nullable = false, length = 100)
-    private String currentPosition;
-	
+	private String currentPosition;
+
 	@Column(name = "organization", nullable = false, length = 100)
-    private String organization;
-	
+	private String organization;
+
 	@Lob
-    @Column(name = "professional_bio", nullable = false,columnDefinition = "TEXT")
-    private String professionalBio;
-	
+	@Column(name = "professional_bio", nullable = false, columnDefinition = "TEXT")
+	private String professionalBio;
+
 	/*
 	 * @ElementCollection(fetch = FetchType.LAZY)
 	 * 
@@ -89,22 +85,22 @@ public class Mentor extends BaseEntity{
 	 * 
 	 * @Column(name = "expertise") private Set<String> expertiseAreas;
 	 */
-	
+
 	@Column(name = "linkedin_url")
-    private String linkedinUrl;
+	private String linkedinUrl;
 
-    @Column(name = "portfolio_url")
-    private String portfolioUrl;
-    
-    //for resume handling
-    @Lob
-    @Column(name = "resume", columnDefinition = "LONGBLOB")
-    private byte[] resume;
+	@Column(name = "portfolio_url")
+	private String portfolioUrl;
 
-    @Column(name = "resume_file_name")
-    private String resumeFileName;
+	// for resume handling
+	@Lob
+	@Column(name = "resume", columnDefinition = "LONGBLOB")
+	private byte[] resume;
 
-    @Column(name = "resume_content_type")
-    private String resumeContentType;
-	 
+	@Column(name = "resume_file_name")
+	private String resumeFileName;
+
+	@Column(name = "resume_content_type")
+	private String resumeContentType;
+
 }

@@ -6,7 +6,7 @@ import {
   getVerifiedMentors,
   getMentorDetails,
 } from "../../../service/studentservice";
-import ScheduleSessionModal from "../MySessions/ScheduleSessionModal";
+import ScheduleSessionModal from "../../../Component/ScheduleSessionModal/ScheduleSessionModal";
 import { getStudentId } from "../../../service/authService";
 
 const MyMentor = ({ onNavigateToDashboard }) => {
@@ -143,8 +143,8 @@ const MyMentor = ({ onNavigateToDashboard }) => {
       const avgRating =
         feedbacks.length > 0
           ? (
-              feedbacks.reduce((sum, f) => sum + f.rating, 0) / feedbacks.length
-            ).toFixed(1)
+            feedbacks.reduce((sum, f) => sum + f.rating, 0) / feedbacks.length
+          ).toFixed(1)
           : 4.9;
 
       setSessionStats({
