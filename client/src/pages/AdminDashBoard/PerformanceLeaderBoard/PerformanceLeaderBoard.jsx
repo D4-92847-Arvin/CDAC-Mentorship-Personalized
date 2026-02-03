@@ -25,6 +25,7 @@ const TopListItem = ({
 
 export const PerformanceLeaderboards = () => {
   const [topMentors, setTopMentors] = useState([]);
+  const [topStudents, setTopStudents] = useState([]);
   const [longestStreaks, setLongestStreaks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -38,6 +39,7 @@ export const PerformanceLeaderboards = () => {
       setLoading(true);
 
       let mentorsData = [];
+      let studentsData = [];
       let streaksData = [];
 
       try {
@@ -47,12 +49,19 @@ export const PerformanceLeaderboards = () => {
       }
 
       try {
+        studentsData = await adminDashboardService.getTopStudents(5);
+      } catch (err) {
+        console.error("Error fetching top students:", err);
+      }
+
+      try {
         streaksData = await adminDashboardService.getLongestActivityStreaks(4);
       } catch (err) {
         console.error("Error fetching activity streaks:", err);
       }
 
       setTopMentors(mentorsData || []);
+      setTopStudents(studentsData || []);
       setLongestStreaks(streaksData || []);
       setError(null);
     } catch (err) {
@@ -72,50 +81,6 @@ export const PerformanceLeaderboards = () => {
       </div>
     );
   }
-
-  // Default data for students (you can add getTopStudents endpoint if needed)
-  const topStudents = [
-    {
-      id: 1,
-      name: "Alex Thompson",
-      completed: 48,
-      rating: 5.0,
-      hours: 96,
-      badge: "🥇",
-    },
-    {
-      id: 2,
-      name: "Maria Garcia",
-      completed: 45,
-      rating: 4.9,
-      hours: 90,
-      badge: "🥈",
-    },
-    {
-      id: 3,
-      name: "John Davis",
-      completed: 42,
-      rating: 4.9,
-      hours: 84,
-      badge: "🥉",
-    },
-    {
-      id: 4,
-      name: "Sophie Lee",
-      completed: 38,
-      rating: 4.8,
-      hours: 76,
-      badge: "",
-    },
-    {
-      id: 5,
-      name: "Ryan Miller",
-      completed: 35,
-      rating: 4.8,
-      hours: 70,
-      badge: "",
-    },
-  ];
 
   return (
     <section className="pl-root p-4">
@@ -182,18 +147,24 @@ export const PerformanceLeaderboards = () => {
               </div>
 
               <div className="pl-list">
-                {topStudents.map((s, i) => (
-                  <TopListItem
-                    key={s.id}
-                    idx={i}
-                    title={s.badge || `#${i + 1}`}
-                    subtitle={s.name}
-                    meta=""
-                    score={s.rating}
-                    highlight={i < 3}
-                    scoreClass="pl-score--blue"
-                  />
-                ))}
+                {topStudents.length > 0 ? (
+                  topStudents.map((s, i) => (
+                    <TopListItem
+                      key={s.studentId || i}
+                      idx={i}
+                      title={i < 3 ? ["🥇", "🥈", "🥉"][i] : `#${i + 1}`}
+                      subtitle={s.name || "Unknown"}
+                      meta={s.targetDomain || ""}
+                      score={s.sessionsCompleted || 0}
+                      highlight={i < 3}
+                      scoreClass="pl-score--blue"
+                    />
+                  ))
+                ) : (
+                  <div className="text-center text-muted py-4">
+                    No student data available
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -15,15 +15,19 @@ import org.springframework.transaction.annotation.Transactional;
 import com.mentorship.dtos.ActivityStreakDto;
 import com.mentorship.dtos.AdminOverviewDto;
 import com.mentorship.dtos.ChurnReasonDto;
+import com.mentorship.dtos.CohortRetentionDto;
 import com.mentorship.dtos.MentorLeaderboardDto;
 import com.mentorship.dtos.MonthlyRevenueDto;
 import com.mentorship.dtos.PendingVerificationDto;
+import com.mentorship.dtos.PlatformGrowthDto;
 import com.mentorship.dtos.RetentionChurnDto;
 import com.mentorship.dtos.RevenueStatsDto;
+import com.mentorship.dtos.StudentLeaderboardDto;
 import com.mentorship.dtos.UserManagementDto;
 import com.mentorship.entities.Mentor;
 import com.mentorship.entities.Session;
 import com.mentorship.entities.SessionStatus;
+import com.mentorship.entities.Student;
 import com.mentorship.entities.User;
 import com.mentorship.entities.UserRole;
 import com.mentorship.entities.VerificationStatus;
@@ -200,55 +204,70 @@ public class AdminDashboardService {
     
     @Transactional(readOnly = true)
     public long getTotalUsers() {
-        return userRepository.findAll().stream()
-                .filter(user -> user.getDeleted() == null || !user.getDeleted()) // Exclude soft-deleted users
-                .count();
+        try {
+            return userRepository.findAll().stream()
+                    .filter(user -> {
+                        try {
+                            return user.getDeleted() == null || !user.getDeleted();
+                        } catch (Exception e) {
+                            return true;
+                        }
+                    })
+                    .count();
+        } catch (Exception e) {
+            return 0;
+        }
     }
     
     @Transactional(readOnly = true)
     public long getActiveUsers() {
-        List<User> allUsers = userRepository.findAll();
-        List<Mentor> allMentors = mentorRepository.findAll();
-        
-        return allUsers.stream()
-                .filter(user -> user.getDeleted() == null || !user.getDeleted()) // Exclude soft-deleted users
-                .filter(u -> u.getCreatedAt() != null)
-                .filter(user -> {
-                    // Include students and admins
-                    if (user.getUserRole().equals(UserRole.STUDENT) || 
-                        user.getUserRole().equals(UserRole.ADMIN)) {
-                        return true;
-                    }
-                    
-                    // For mentors, only include VERIFIED mentors
-                    if (user.getUserRole().equals(UserRole.MENTOR)) {
-                        return allMentors.stream()
-                                .anyMatch(mentor -> mentor.getUserDetails() != null && 
-                                                   mentor.getUserDetails().getUserId().equals(user.getUserId()) &&
-                                                   mentor.getVerificationStatus() != null &&
-                                                   mentor.getVerificationStatus().equals(VerificationStatus.VERIFIED));
-                    }
-                    
-                    return false;
-                })
-                .count();
+        try {
+            return userRepository.findAll().stream()
+                    .filter(user -> {
+                        try {
+                            return user.getDeleted() == null || !user.getDeleted();
+                        } catch (Exception e) {
+                            return false;
+                        }
+                    })
+                    .count();
+        } catch (Exception e) {
+            return 0;
+        }
     }
     
     @Transactional(readOnly = true)
     public long getNewUsersThisMonth() {
-        LocalDate startOfMonth = LocalDate.now().withDayOfMonth(1);
-        LocalDate endOfMonth = LocalDate.now().withDayOfMonth(
-            LocalDate.now().lengthOfMonth()
-        );
-        
-        return userRepository.findAll().stream()
-                .filter(user -> user.getDeleted() == null || !user.getDeleted()) // Exclude soft-deleted users
-                .filter(u -> {
-                    LocalDate createdDate = u.getCreatedAt().toLocalDate();
-                    return !createdDate.isBefore(startOfMonth) && 
-                           !createdDate.isAfter(endOfMonth);
-                })
-                .count();
+        try {
+            LocalDate startOfMonth = LocalDate.now().withDayOfMonth(1);
+            LocalDate endOfMonth = LocalDate.now().withDayOfMonth(
+                LocalDate.now().lengthOfMonth()
+            );
+            
+            return userRepository.findAll().stream()
+                    .filter(user -> {
+                        try {
+                            return user.getDeleted() == null || !user.getDeleted();
+                        } catch (Exception e) {
+                            return true;
+                        }
+                    })
+                    .filter(u -> {
+                        try {
+                            if (u.getCreatedAt() == null) {
+                                return false;
+                            }
+                            LocalDate createdDate = u.getCreatedAt().toLocalDate();
+                            return !createdDate.isBefore(startOfMonth) && 
+                                   !createdDate.isAfter(endOfMonth);
+                        } catch (Exception e) {
+                            return false;
+                        }
+                    })
+                    .count();
+        } catch (Exception e) {
+            return 0;
+        }
     }
     
     @Transactional
@@ -544,6 +563,61 @@ public class AdminDashboardService {
         return result;
     }
     
+    @Transactional(readOnly = true)
+    public List<PlatformGrowthDto> getPlatformGrowthData() {
+        List<PlatformGrowthDto> result = new ArrayList<>();
+        
+        LocalDate now = LocalDate.now();
+        LocalDate sixMonthsAgo = now.minusMonths(5);
+        
+        for (int i = 0; i < 6; i++) {
+            LocalDate monthDate = sixMonthsAgo.plusMonths(i);
+            int year = monthDate.getYear();
+            int month = monthDate.getMonthValue();
+            
+            try {
+                PlatformGrowthDto dto = new PlatformGrowthDto();
+                
+                // Set month name
+                String monthName = monthDate.getMonth().toString().substring(0, 3);
+                monthName = monthName.charAt(0) + monthName.substring(1).toLowerCase();
+                dto.setMonth(monthName);
+                
+                // Count students registered up to this month
+                LocalDate endOfMonth = monthDate.withDayOfMonth(monthDate.lengthOfMonth());
+                long students = userRepository.findAll().stream()
+                        .filter(u -> u != null && u.getUserRole() == UserRole.STUDENT)
+                        .filter(u -> u.getCreatedAt() != null && !u.getCreatedAt().toLocalDate().isAfter(endOfMonth))
+                        .count();
+                dto.setStudents(students);
+                
+                // Count mentors registered up to this month
+                long mentors = userRepository.findAll().stream()
+                        .filter(u -> u != null && u.getUserRole() == UserRole.MENTOR)
+                        .filter(u -> u.getCreatedAt() != null && !u.getCreatedAt().toLocalDate().isAfter(endOfMonth))
+                        .count();
+                dto.setMentors(mentors);
+                
+                // Count sessions for this month
+                long sessions = sessionRepository.findAll().stream()
+                        .filter(s -> s != null && s.getSessionDate() != null)
+                        .filter(s -> s.getSessionDate().getYear() == year && s.getSessionDate().getMonthValue() == month)
+                        .count();
+                dto.setSessions(sessions);
+                
+                // Get revenue for this month
+                Double revenue = transactionRepository.getMonthlyRevenue(year, month);
+                dto.setRevenue(revenue != null ? revenue : 0.0);
+                
+                result.add(dto);
+            } catch (Exception e) {
+                System.err.println("Error processing platform growth for month: " + monthDate + " - " + e.getMessage());
+            }
+        }
+        
+        return result;
+    }
+    
     // ==================== LEADERBOARDS ====================
     
     @Transactional(readOnly = true)
@@ -694,6 +768,78 @@ public class AdminDashboardService {
         }
     }
     
+    @Transactional(readOnly = true)
+    public List<StudentLeaderboardDto> getTopStudentsByActivity(int limit) {
+        try {
+            return studentRepository.findAll().stream()
+                    .filter(s -> s != null && s.getUserDetails() != null)
+                    .map(this::mapToStudentLeaderboardDto)
+                    .filter(s -> s != null)
+                    .sorted(Comparator.comparingLong(StudentLeaderboardDto::getSessionsCompleted).reversed())
+                    .limit(limit)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
+    }
+    
+    private StudentLeaderboardDto mapToStudentLeaderboardDto(Student student) {
+        try {
+            StudentLeaderboardDto dto = new StudentLeaderboardDto();
+            dto.setStudentId(student.getStudentId());
+            
+            if (student.getUserDetails() != null) {
+                dto.setName((student.getUserDetails().getFirstName() != null ? student.getUserDetails().getFirstName() : "") + " " + 
+                           (student.getUserDetails().getLastName() != null ? student.getUserDetails().getLastName() : ""));
+            } else {
+                dto.setName("Unknown");
+            }
+            
+            dto.setTargetDomain(student.getTargetDomain() != null ? student.getTargetDomain() : "");
+            
+            // Get session count for student
+            long sessionsCompleted = 0;
+            try {
+                List<Session> allSessions = sessionRepository.findAll();
+                Long studentIdValue = student.getStudentId();
+                
+                sessionsCompleted = allSessions.stream()
+                        .filter(s -> s != null && s.getStatus() == SessionStatus.COMPLETED)
+                        .filter(s -> {
+                            try {
+                                if (s.getStudent() != null && s.getStudent().getStudentId() != null) {
+                                    return s.getStudent().getStudentId().equals(studentIdValue);
+                                }
+                                return false;
+                            } catch (Exception e) {
+                                return false;
+                            }
+                        })
+                        .count();
+            } catch (Exception e) {
+                sessionsCompleted = 0;
+            }
+            dto.setSessionsCompleted(sessionsCompleted);
+            
+            // Calculate total hours (assuming 1 hour per session)
+            dto.setTotalHoursLearned(sessionsCompleted);
+            
+            // Get average rating given by student (optional)
+            double avgRating = 0;
+            try {
+                // Students don't typically have ratings, so we'll use a default
+                avgRating = 0.0;
+            } catch (Exception e) {
+                avgRating = 0.0;
+            }
+            dto.setAverageRating(avgRating);
+            
+            return dto;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    
     // ==================== RETENTION & CHURN ====================
     
     @Transactional(readOnly = true)
@@ -760,6 +906,125 @@ public class AdminDashboardService {
         reasons.add(new ChurnReasonDto("Other", 12, 10.0));
         
         return reasons;
+    }
+    
+    @Transactional(readOnly = true)
+    public List<CohortRetentionDto> getCohortRetentionAnalysis() {
+        List<CohortRetentionDto> result = new ArrayList<>();
+        
+        try {
+            LocalDate now = LocalDate.now();
+            // Analyze last 6 cohorts
+            for (int i = 5; i >= 0; i--) {
+                LocalDate cohortMonth = now.minusMonths(i).withDayOfMonth(1);
+                CohortRetentionDto dto = calculateCohortRetention(cohortMonth);
+                if (dto != null && dto.getTotalUsers() > 0) {
+                    result.add(dto);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error calculating cohort retention: " + e.getMessage());
+        }
+        
+        return result;
+    }
+    
+    private CohortRetentionDto calculateCohortRetention(LocalDate cohortMonth) {
+        try {
+            // Get cohort month range
+            LocalDate cohortStart = cohortMonth.withDayOfMonth(1);
+            LocalDate cohortEnd = cohortMonth.withDayOfMonth(cohortMonth.lengthOfMonth());
+            
+            // Find all users who signed up in this cohort month
+            List<User> cohortUsers = userRepository.findAll().stream()
+                    .filter(u -> u != null && u.getCreatedAt() != null)
+                    .filter(u -> {
+                        LocalDate userSignup = u.getCreatedAt().toLocalDate();
+                        return !userSignup.isBefore(cohortStart) && !userSignup.isAfter(cohortEnd);
+                    })
+                    .collect(Collectors.toList());
+            
+            int totalUsers = cohortUsers.size();
+            if (totalUsers == 0) {
+                return null;
+            }
+            
+            // Calculate retention for each subsequent month
+            String month1 = "100%"; // First month is always 100%
+            String month2 = calculateMonthRetention(cohortUsers, cohortMonth.plusMonths(1));
+            String month3 = calculateMonthRetention(cohortUsers, cohortMonth.plusMonths(2));
+            String month4 = calculateMonthRetention(cohortUsers, cohortMonth.plusMonths(3));
+            
+            // If cohort is too recent, some months won't have data yet
+            if (cohortMonth.plusMonths(1).isAfter(LocalDate.now())) {
+                month2 = null;
+            }
+            if (cohortMonth.plusMonths(2).isAfter(LocalDate.now())) {
+                month3 = null;
+            }
+            if (cohortMonth.plusMonths(3).isAfter(LocalDate.now())) {
+                month4 = null;
+            }
+            
+            CohortRetentionDto dto = new CohortRetentionDto();
+            String monthName = cohortMonth.getMonth().toString().substring(0, 3);
+            monthName = monthName.charAt(0) + monthName.substring(1).toLowerCase();
+            dto.setCohort(monthName + " " + cohortMonth.getYear());
+            dto.setTotalUsers(totalUsers);
+            dto.setMonth1Retention(month1);
+            dto.setMonth2Retention(month2);
+            dto.setMonth3Retention(month3);
+            dto.setMonth4Retention(month4);
+            
+            return dto;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    
+    private String calculateMonthRetention(List<User> cohortUsers, LocalDate targetMonth) {
+        if (targetMonth.isAfter(LocalDate.now())) {
+            return null;
+        }
+        
+        try {
+            LocalDate monthStart = targetMonth.withDayOfMonth(1);
+            LocalDate monthEnd = targetMonth.withDayOfMonth(targetMonth.lengthOfMonth());
+            
+            // Count how many cohort users had activity (sessions) in target month
+            long activeUsers = cohortUsers.stream()
+                    .filter(user -> {
+                        try {
+                            // Check if user had any sessions in this month
+                            boolean hadActivity = sessionRepository.findAll().stream()
+                                    .filter(s -> s != null && s.getSessionDate() != null)
+                                    .filter(s -> !s.getSessionDate().isBefore(monthStart) && 
+                                               !s.getSessionDate().isAfter(monthEnd))
+                                    .anyMatch(s -> {
+                                        try {
+                                            if (s.getStudent() != null && s.getStudent().getUserDetails() != null) {
+                                                return s.getStudent().getUserDetails().getUserId().equals(user.getUserId());
+                                            }
+                                            if (s.getMentor() != null && s.getMentor().getUserDetails() != null) {
+                                                return s.getMentor().getUserDetails().getUserId().equals(user.getUserId());
+                                            }
+                                        } catch (Exception e) {
+                                            return false;
+                                        }
+                                        return false;
+                                    });
+                            return hadActivity;
+                        } catch (Exception e) {
+                            return false;
+                        }
+                    })
+                    .count();
+            
+            double retentionPercent = (activeUsers / (double) cohortUsers.size()) * 100;
+            return Math.round(retentionPercent) + "%";
+        } catch (Exception e) {
+            return "0%";
+        }
     }
     
     // ==================== HELPER METHODS ====================

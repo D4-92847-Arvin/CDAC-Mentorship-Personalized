@@ -19,12 +19,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mentorship.dtos.ActivityStreakDto;
 import com.mentorship.dtos.AdminOverviewDto;
 import com.mentorship.dtos.ChurnReasonDto;
+import com.mentorship.dtos.CohortRetentionDto;
 import com.mentorship.dtos.MentorLeaderboardDto;
 import com.mentorship.dtos.MonthlyRevenueDto;
 import com.mentorship.dtos.PendingVerificationDto;
+import com.mentorship.dtos.PlatformGrowthDto;
 import com.mentorship.dtos.RecentActivityDto;
 import com.mentorship.dtos.RetentionChurnDto;
 import com.mentorship.dtos.RevenueStatsDto;
+import com.mentorship.dtos.StudentLeaderboardDto;
 import com.mentorship.dtos.UserManagementDto;
 import com.mentorship.service.AdminDashboardService;
 
@@ -172,6 +175,13 @@ public class AdminDashboardController {
         return ResponseEntity.ok(adminDashboardService.getTopMentorsByRating(limit));
     }
     
+    @GetMapping("/leaderboards/students")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<StudentLeaderboardDto>> getTopStudents(
+            @RequestParam(defaultValue = "5") int limit) {
+        return ResponseEntity.ok(adminDashboardService.getTopStudentsByActivity(limit));
+    }
+    
     @GetMapping("/leaderboards/activity-streak")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ActivityStreakDto>> getLongestActivityStreaks(
@@ -183,50 +193,15 @@ public class AdminDashboardController {
     
     @GetMapping("/growth/platform")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<Map<String, Object>>> getPlatformGrowthData() {
-        List<Map<String, Object>> growthData = List.of(
-            createGrowthData("Apr", 150, 50),
-            createGrowthData("May", 180, 65),
-            createGrowthData("Jun", 280, 95),
-            createGrowthData("Jul", 450, 145),
-            createGrowthData("Aug", 520, 180),
-            createGrowthData("Sep", 820, 220)
-        );
-        return ResponseEntity.ok(growthData);
+    public ResponseEntity<List<PlatformGrowthDto>> getPlatformGrowthData() {
+        return ResponseEntity.ok(adminDashboardService.getPlatformGrowthData());
     }
     
     // ==================== COHORT ANALYSIS ====================
     
     @GetMapping("/cohorts/retention")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<Map<String, Object>>> getCohortRetentionAnalysis() {
-        List<Map<String, Object>> cohortData = List.of(
-            createCohortData("Jan 2024", "100%", "85%", "72%", "68%"),
-            createCohortData("Feb 2024", "100%", "88%", "75%", "70%"),
-            createCohortData("Mar 2024", "100%", "90%", "78%", "72%"),
-            createCohortData("Apr 2024", "100%", "92%", "80%", null)
-        );
-        return ResponseEntity.ok(cohortData);
-    }
-    
-    // ==================== HELPER METHODS ====================
-    
-    private Map<String, Object> createGrowthData(String month, double students, double mentors) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("month", month);
-        data.put("students", students);
-        data.put("mentors", mentors);
-        return data;
-    }
-    
-    private Map<String, Object> createCohortData(String cohort, String month1, 
-                                                   String month2, String month3, String month4) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("cohort", cohort);
-        data.put("month1", month1);
-        data.put("month2", month2);
-        data.put("month3", month3);
-        data.put("month4", month4);
-        return data;
+    public ResponseEntity<List<CohortRetentionDto>> getCohortRetentionAnalysis() {
+        return ResponseEntity.ok(adminDashboardService.getCohortRetentionAnalysis());
     }
 }

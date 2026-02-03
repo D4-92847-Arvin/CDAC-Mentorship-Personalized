@@ -1,11 +1,35 @@
 import React, { useState, useEffect } from "react";
 import "./OverviewContent.css";
 import { adminDashboardService } from "../../../service/adminDashboardService";
+import { Bar } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
 
-const OverviewContent = ({ chartData, activities, refreshTrigger }) => {
+// Register ChartJS components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+);
+
+const OverviewContent = ({
+  chartData,
+  activities,
+  refreshTrigger,
+  onNavigate,
+}) => {
   const [stats, setStats] = useState(null);
-  const [growth, setGrowth] = useState(null);
-  const [activity, setActivity] = useState(null);
+  const [revenue, setRevenue] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -17,8 +41,7 @@ const OverviewContent = ({ chartData, activities, refreshTrigger }) => {
 
         // Fetch each item individually with error handling
         let overviewData = null;
-        let growthData = null;
-        let activityData = null;
+        let revenueData = null;
 
         try {
           const response = await adminDashboardService.getOverviewStats();
@@ -29,30 +52,19 @@ const OverviewContent = ({ chartData, activities, refreshTrigger }) => {
         }
 
         try {
-          const response = await adminDashboardService.getPlatformGrowthData();
-          console.log("Growth data received:", response);
-          growthData = response;
+          const response = await adminDashboardService.getMonthlyRevenue();
+          console.log("Revenue data received:", response);
+          revenueData = response;
         } catch (err) {
-          console.error("Error fetching growth data:", err);
-        }
-
-        try {
-          const response = await adminDashboardService.getRecentActivity();
-          console.log("Activity data received:", response);
-          activityData = response;
-        } catch (err) {
-          console.error("Error fetching activity:", err);
+          console.error("Error fetching revenue data:", err);
         }
 
         // Only use real data if it was successfully fetched
         if (overviewData) {
           setStats(overviewData);
         }
-        if (growthData) {
-          setGrowth(growthData);
-        }
-        if (activityData) {
-          setActivity(activityData);
+        if (revenueData) {
+          setRevenue(revenueData);
         }
       } catch (err) {
         console.error("Error loading dashboard data:", err);
@@ -89,10 +101,6 @@ const OverviewContent = ({ chartData, activities, refreshTrigger }) => {
           monthlyRevenue: 42500,
           revenueGrowthPercent: 23,
         };
-
-  const displayGrowth = growth && growth.length > 0 ? growth : chartData;
-  const displayActivity =
-    activity && activity.length > 0 ? activity : activities;
 
   const formatCurrency = (value) => {
     if (value >= 1000) {
@@ -188,127 +196,75 @@ const OverviewContent = ({ chartData, activities, refreshTrigger }) => {
         </div>
       </div>
 
-      {/* Charts and Activity */}
-      <div className="row g-3">
-        <div className="col-12 col-lg-8">
-          <div className="custom-card h-100">
-            <h5 className="card-header-title mb-3">Platform Growth</h5>
-
-            <svg viewBox="0 0 800 400" className="svg-chart">
-              {/* Grid lines */}
-              {[0, 150, 300, 450, 600].map((val, i) => (
-                <g key={i}>
-                  <line
-                    x1="60"
-                    y1={340 - (val / 600) * 280}
-                    x2="760"
-                    y2={340 - (val / 600) * 280}
-                    stroke="#e5e7eb"
-                    strokeWidth="1"
-                  />
-                  <text
-                    x="30"
-                    y={345 - (val / 600) * 280}
-                    className="chart-label"
-                  >
-                    {val}
-                  </text>
-                </g>
-              ))}
-
-              {chartData.map((d, i) => (
-                <text
-                  key={i}
-                  x={100 + i * 120}
-                  y="370"
-                  className="chart-label"
-                  textAnchor="middle"
-                >
-                  {d.month}
-                </text>
-              ))}
-
-              <polyline
-                points={displayGrowth
-                  .map(
-                    (d, i) =>
-                      `${100 + i * 120},${340 - (d.students / 600) * 280}`,
-                  )
-                  .join(" ")}
-                fill="none"
-                stroke="#2563eb"
-                strokeWidth="3"
+      {/* Revenue Chart */}
+      {revenue && revenue.length > 0 && (
+        <div className="row g-3 mt-3">
+          <div className="col-12">
+            <div className="custom-card">
+              <h5 className="card-header-title mb-3">Monthly Revenue Trend</h5>
+              <Bar
+                data={{
+                  labels: revenue.map((r) => r.month).reverse(),
+                  datasets: [
+                    {
+                      label: "Revenue (₹)",
+                      data: revenue.map((r) => r.revenue).reverse(),
+                      backgroundColor: "rgba(34, 197, 94, 0.6)",
+                      borderColor: "rgba(34, 197, 94, 1)",
+                      borderWidth: 2,
+                    },
+                  ],
+                }}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: true,
+                  aspectRatio: 3,
+                  plugins: {
+                    legend: {
+                      display: true,
+                      position: "top",
+                    },
+                    tooltip: {
+                      callbacks: {
+                        label: function (context) {
+                          let label = context.dataset.label || "";
+                          if (label) {
+                            label += ": ";
+                          }
+                          if (context.parsed.y !== null) {
+                            label += "₹" + context.parsed.y.toLocaleString();
+                          }
+                          return label;
+                        },
+                      },
+                    },
+                  },
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      ticks: {
+                        callback: function (value) {
+                          return "₹" + value.toLocaleString();
+                        },
+                      },
+                    },
+                  },
+                }}
               />
-              {displayGrowth.map((d, i) => (
-                <circle
-                  key={i}
-                  cx={100 + i * 120}
-                  cy={340 - (d.students / 600) * 280}
-                  r="5"
-                  fill="#2563eb"
-                />
-              ))}
-
-              <polyline
-                points={displayGrowth
-                  .map(
-                    (d, i) =>
-                      `${100 + i * 120},${340 - (d.mentors / 600) * 280}`,
-                  )
-                  .join(" ")}
-                fill="none"
-                stroke="#14b8a6"
-                strokeWidth="3"
-              />
-              {displayGrowth.map((d, i) => (
-                <circle
-                  key={i}
-                  cx={100 + i * 120}
-                  cy={340 - (d.mentors / 600) * 280}
-                  r="5"
-                  fill="#14b8a6"
-                />
-              ))}
-            </svg>
+            </div>
           </div>
         </div>
-
-        {/* Recent Activity */}
-        <div className="col-12 col-lg-4">
-          <div className="custom-card h-100">
-            <h5 className="card-header-title mb-3">Recent Activity</h5>
-
-            {displayActivity.map((activityItem, index) => (
-              <div key={index} className="activity-item">
-                <div className="d-flex align-items-center">
-                  <div
-                    className="activity-icon"
-                    style={{ backgroundColor: "#3b5998" }}
-                  >
-                    {activityItem.activityType === "MENTOR_APPROVED" && "👤"}
-                    {activityItem.activityType === "STUDENT_REGISTERED" && "👥"}
-                    {activityItem.activityType === "REVENUE_MILESTONE" && "₹"}
-                  </div>
-                  <div>
-                    <div className="activity-title">{activityItem.title}</div>
-                    <div className="activity-subtitle">
-                      {activityItem.description}
-                    </div>
-                  </div>
-                </div>
-                <div className="activity-time">{activityItem.timeAgo}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* Bottom Section */}
       <div className="row g-3 mt-3">
         <div className="col-12">
           <div className="custom-card d-flex justify-content-between align-items-center">
             <h5 className="card-header-title mb-0">Pending Verifications</h5>
-            <button className="btn btn-link text-decoration-none p-0">
+            <button
+              className="btn btn-link text-decoration-none p-0"
+              onClick={() => onNavigate && onNavigate("verification")}
+            >
               View All
             </button>
           </div>
