@@ -44,11 +44,15 @@ public class SecurityConfiguration {
 			.requestMatchers("/api/test/**").permitAll()  // Allow test endpoints
 			.requestMatchers(HttpMethod.OPTIONS).permitAll()
 			.requestMatchers(HttpMethod.GET, "/students").permitAll()
+			.requestMatchers(HttpMethod.GET, "/users/image/**").permitAll()
+			.requestMatchers(HttpMethod.GET, "/mentors/public", "/mentors/public/**").permitAll()
 			.requestMatchers("/api/mentor/**").permitAll()  // TEMPORARY: Allow all mentor requests for testing
 			.requestMatchers("/api/student/**").permitAll()  // TEMPORARY: Allow all student requests for testing
 			.requestMatchers("/api/messages/**").permitAll()  // Allow all message/chat endpoints
 			.requestMatchers("/api/admin/migration/**").permitAll()  // Allow migration endpoints (one-time use)
 			.requestMatchers("/api/admin/**").hasRole("ADMIN")
+			.requestMatchers("/mentors/me", "/mentors/profile", "/mentors/resume").authenticated()
+			.requestMatchers("/students/**").authenticated()  // Require authentication for students endpoints
 			.anyRequest().authenticated());
 		http.sessionManagement(session ->
 		session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

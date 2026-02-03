@@ -1,5 +1,7 @@
 package com.mentorship.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -75,6 +77,8 @@ public class MentorServiceImpl implements MentorService {
 
 		    if (dto.getPortfolioUrl() != null)
 		        mentor.setPortfolioUrl(dto.getPortfolioUrl());
+
+		    mentorRepository.save(mentor);
 	}
 	@Override
 	public MentorDTO getMentorById(Long userId) {
@@ -83,10 +87,28 @@ public class MentorServiceImpl implements MentorService {
 				.orElseThrow(()-> new RuntimeException("Mentor Not found for the user..!"));
 		return mapToDTO(mentor);
 	}
+
+	@Override
+	public List<MentorDTO> getPublicMentors(String domain) {
+		List<Mentor> mentors;
+		if (domain == null || domain.trim().isEmpty()) {
+			mentors = mentorRepository.findByVerificationStatus(com.mentorship.entities.VerificationStatus.VERIFIED);
+		} else {
+			mentors = mentorRepository.findByVerificationStatusAndSpecializationContainingIgnoreCase(
+					com.mentorship.entities.VerificationStatus.VERIFIED, domain.trim());
+		}
+
+		return mentors.stream()
+				.map(this::mapToDTO)
+				.toList();
+	}
 	
 	private MentorDTO mapToDTO(Mentor mentor) {
 		
 		MentorDTO dto = new MentorDTO();
+		if (mentor.getUserDetails() != null) {
+			dto.setUserId(mentor.getUserDetails().getUserId());
+		}
 		dto.setMentorId(mentor.getMentorId());
 	    dto.setName(mentor.getUserDetails().getFirstName() + " " + mentor.getUserDetails().getLastName());
 	    dto.setSpecialization(mentor.getSpecialization());
@@ -95,6 +117,12 @@ public class MentorServiceImpl implements MentorService {
 	    dto.setExperience(mentor.getExperience());
 	    dto.setAbout(mentor.getSpecialization());
 	    dto.setExpertise(mentor.getSpecialization());
+	    dto.setHighestEducation(mentor.getHighestEducation());
+	    dto.setCurrentPosition(mentor.getCurrentPosition());
+	    dto.setOrganization(mentor.getOrganization());
+	    dto.setProfessionalBio(mentor.getProfessionalBio());
+	    dto.setLinkedinUrl(mentor.getLinkedinUrl());
+	    dto.setPortfolioUrl(mentor.getPortfolioUrl());
     	if(mentor.getVerificationStatus() != null) {
     		dto.setVerificationStatus(mentor.getVerificationStatus().name());
     	} else {

@@ -17,7 +17,7 @@ const Navbar = () => {
     if (hasRole("student")) {
       navigate("/student-dashboard");
     } else if (hasRole("mentor")) {
-      navigate("/mentor/dashboard");
+      navigate("/mentor");
     } else if (hasRole("admin")) {
       navigate("/admin-dashboard");
     }

@@ -219,7 +219,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public StudentDTO getStudentByUserId(Long userId) {
         Student student = studentRepository.findByUserDetails_UserId(userId)
-                .orElseThrow(() -> new RuntimeException("Student not found with userId: " + userId));
+                .orElseThrow(() -> new RuntimeException("Student not found for user id: " + userId));
         return mapToStudentDTO(student);
     }
 
@@ -656,4 +656,6 @@ public class StudentServiceImpl implements StudentService {
 
         return sessions;
     }
+
+	
 }

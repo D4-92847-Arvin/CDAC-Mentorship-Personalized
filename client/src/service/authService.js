@@ -32,8 +32,7 @@ export const getMentorId = () => {
     // Try to decode JWT if mentorId not stored
     try {
       const decoded = parseJwt(token);
-      // JWT has userId, not mentorId
-      return decoded?.mentorId || null;
+      return decoded?.mentorId || decoded?.userId || null;
     } catch (error) {
       console.error("Error decoding token:", error);
       return null;

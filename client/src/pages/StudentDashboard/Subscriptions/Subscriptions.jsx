@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./Subscriptions.css";
 import { getStudentId } from "../../../service/authService";
-import { getActiveSubscription } from "../../../service/studentService";
+import { getActiveSubscription } from "../../../service/studentservice";
 
 const plans = [
   { id: 1, name: "Pay Per Session", price: 49, period: "/session", icon: "⚡" },

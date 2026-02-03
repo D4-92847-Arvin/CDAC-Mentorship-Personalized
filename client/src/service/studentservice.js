@@ -43,8 +43,8 @@ export const getActiveSubscription = (studentId) => {
 };
 
 // Get verified mentors
-export const getVerifiedMentors = (domain = null) => {
-  const params = domain ? { domain } : {};
+export const getVerifiedMentors = (studentId, domain = null) => {
+  const params = domain ? { studentId, domain } : { studentId };
   return api.get(`/api/student/mentors`, { params });
 };
 
@@ -81,4 +81,48 @@ export const getAssignedMentor = (studentId) => {
 // Update student profile
 export const updateStudentProfile = (studentId, profileData) => {
   return api.put(`/api/student/${studentId}`, profileData);
+};
+
+// Delete a session
+export const deleteSession = (sessionId) => {
+  return api.delete(`/api/student/sessions/${sessionId}`);
+};
+
+// Study Timer functions
+export const startStudySession = (studentId, taskName) => {
+  return api.post(`/api/student/${studentId}/study-timer/start`, { taskName });
+};
+
+export const stopStudySession = (sessionId) => {
+  return api.post(`/api/student/study-timer/${sessionId}/stop`);
+};
+
+export const getStudyHistory = (studentId) => {
+  return api.get(`/api/student/${studentId}/study-timer/history`);
+};
+
+export const deleteStudySession = (sessionId) => {
+  return api.delete(`/api/student/study-timer/${sessionId}`);
+};
+
+// Chat functions for students
+export const sendMessageToMentor = (messageData) => {
+  return api.post('/messages/send', messageData);
+};
+
+export const getConversationWithMentor = (studentId, mentorId) => {
+  return api.get(`/messages/student/${studentId}/mentor/${mentorId}`);
+};
+
+export const markMessagesAsReadByStudent = (studentId, mentorId) => {
+  return api.put(`/messages/student/${studentId}/mentor/${mentorId}/mark-read`);
+};
+
+export const getStudentConversations = (studentId) => {
+  return api.get(`/messages/student/${studentId}/conversations`);
+};
+
+// Subscription function
+export const getActiveSubscription = (studentId) => {
+  return api.get(`/api/student/${studentId}/subscription/active`);
 };

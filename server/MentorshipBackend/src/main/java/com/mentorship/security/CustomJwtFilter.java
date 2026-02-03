@@ -43,22 +43,23 @@ public class CustomJwtFilter extends OncePerRequestFilter{
 				
 				String jwt = headerValue.substring(7);
 				log.info("JWT in request header {}", jwt);
+		
+				try {
+					String email = jwtUtils.getUserNameFromJwtToken(jwtUtils.validateJwtToken(jwt));
+			
+					if(email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 				
-				//Claims claims = jwtUtils.validateJwtToken(jwt); 
+						UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
 				
-				//String email = jwtUtils.getEmailFromJwtToken(jwt);
+						UsernamePasswordAuthenticationToken authentication =
+								new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
+						authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 				
-				String email = jwtUtils.getUserNameFromJwtToken(jwtUtils.validateJwtToken(jwt));
-				
-				if(email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-					
-					UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
-					
-					UsernamePasswordAuthenticationToken authentication =
-							new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
-					authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-					
-					SecurityContextHolder.getContext().setAuthentication(authentication);
+						SecurityContextHolder.getContext().setAuthentication(authentication);
+						log.info("Authentication set for user: {}", email);
+					}
+				} catch (Exception e) {
+					log.error("Error validating JWT token: {}", e.getMessage(), e);
 				}
 				
 				
