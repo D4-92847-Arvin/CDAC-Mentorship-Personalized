@@ -4,7 +4,7 @@ import api from "../../service/api";
 import {
   getConversationWithMentor,
   markMessagesAsReadByStudent,
-} from "../../service/studentService";
+} from "../../service/studentservice";
 
 const StudentChatModal = ({ isOpen, onClose, studentId }) => {
   const [mentors, setMentors] = useState([]);

@@ -53,4 +53,10 @@ public class MentorController {
 		Long userId = SecurityUtils.getLoggedInUserId();
 		return ResponseEntity.ok(mentorService.getMentorById(userId));
 	}
+
+	@GetMapping("/public")
+	public ResponseEntity<java.util.List<MentorDTO>> getPublicMentors(
+			@RequestParam(required = false) String domain) {
+		return ResponseEntity.ok(mentorService.getPublicMentors(domain));
+	}
 }

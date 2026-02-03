@@ -7,7 +7,9 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
-  if (token) {
+  if (!token) {
+    console.warn("No auth token found in localStorage!");
+  } else {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;

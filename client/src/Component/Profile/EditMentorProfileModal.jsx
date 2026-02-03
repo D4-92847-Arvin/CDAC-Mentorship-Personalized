@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../Modal.css";
-import { updateMentorProfile, getMyMentorProfile } from "../../service/mentorservice";
+import { updateMentorProfile, getMyMentorProfile } from "../../service/mentorService";
 
 const EditMentorProfileModal = ({ isOpen, onClose, onProfileUpdated }) => {
   const [formData, setFormData] = useState({

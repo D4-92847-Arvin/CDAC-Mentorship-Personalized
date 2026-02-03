@@ -14,6 +14,12 @@ public interface MentorRepository extends JpaRepository<Mentor, Long> {
     
     @Query("SELECT m FROM Mentor m WHERE m.userDetails.userId = :userId")
     Optional<Mentor> findByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT m.userDetails.userId FROM Mentor m WHERE m.verificationStatus = :status AND m.userDetails IS NOT NULL")
+    List<Long> findMentorUserIdsByVerificationStatus(@Param("status") VerificationStatus status);
+
+    @Query("SELECT m FROM Mentor m JOIN FETCH m.userDetails WHERE m.verificationStatus = :status")
+    List<Mentor> findByVerificationStatusWithUserDetails(@Param("status") VerificationStatus status);
     
     List<Mentor> findByVerificationStatus(VerificationStatus status);
     

@@ -5,7 +5,7 @@ import {
   stopStudySession,
   getStudyHistory,
   deleteStudySession,
-} from "../../../service/studentService";
+} from "../../../service/studentservice";
 import { getStudentId } from "../../../service/authService";
 
 const StudyTimer = () => {

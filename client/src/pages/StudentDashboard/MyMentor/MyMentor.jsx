@@ -5,7 +5,7 @@ import {
   getStudentFeedbacks,
   getVerifiedMentors,
   getMentorDetails,
-} from "../../../service/studentService";
+} from "../../../service/studentservice";
 import ScheduleSessionModal from "../MySessions/ScheduleSessionModal";
 import { getStudentId } from "../../../service/authService";
 

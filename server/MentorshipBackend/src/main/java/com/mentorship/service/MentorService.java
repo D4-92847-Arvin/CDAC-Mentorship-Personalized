@@ -1,5 +1,7 @@
 package com.mentorship.service;
 
+import java.util.List;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import com.mentorship.dto.MentorDTO;
@@ -11,4 +13,6 @@ public interface MentorService {
 	void partialUpdateProfile(Long userId,UpdateMentorProfileRequest dto);
 
 	MentorDTO getMentorById(Long userId);
+
+	List<MentorDTO> getPublicMentors(String domain);
 }

@@ -6,7 +6,7 @@ import {
   markMessagesAsReadByStudent,
   getStudentConversations,
   getVerifiedMentors,
-} from "../../../service/studentService";
+} from "../../../service/studentservice";
 
 const StudentChatModal = ({ isOpen, onClose, studentId }) => {
   const [conversations, setConversations] = useState([]);
