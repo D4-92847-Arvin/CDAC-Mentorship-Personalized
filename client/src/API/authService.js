@@ -66,6 +66,8 @@ export const registerMentor = async (mentorData) => {
 export const logout = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
+  localStorage.removeItem("studentId");
+  localStorage.removeItem("mentorId");
 };
 
 // Decode JWT token to get user information

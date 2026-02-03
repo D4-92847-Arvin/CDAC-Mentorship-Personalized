@@ -5,7 +5,7 @@ import {
   cancelSession,
 } from "../../../service/studentservice";
 import { getStudentId } from "../../../service/authService";
-import ScheduleSessionModal from "./ScheduleSessionModal";
+import ScheduleSessionModal from "../../../Component/ScheduleSessionModal/ScheduleSessionModal";
 
 const MySessions = () => {
   const [upcomingSessions, setUpcomingSessions] = useState([]);
@@ -140,8 +140,10 @@ const MySessions = () => {
       setLoading(true);
       await cancelSession(sessionId);
       alert("Session cancelled successfully");
-      // Refresh sessions
-      fetchSessions();
+      // Force refresh sessions with a small delay to ensure backend has processed
+      setTimeout(() => {
+        fetchSessions();
+      }, 500);
     } catch (err) {
       console.error("Error cancelling session:", err);
       setError(err.response?.data?.message || "Failed to cancel session");
@@ -164,7 +166,11 @@ const MySessions = () => {
   // Collect unique mentor IDs ONLY from UPCOMING active sessions
   // This matches the "Your Mentors" logic which only shows active mentors
   // Users must browse verified mentors to re-book past/completed mentors if they are no longer active
-  const filterMentorIds = [...new Set(upcomingSessions.map((s) => s.mentorId))];
+  // Calculate filterMentorIds
+  // Collect unique mentor IDs ONLY from UPCOMING active sessions
+  const upcomingMentorIds = [...new Set(upcomingSessions.map((s) => s.mentorId))];
+  // If no upcoming sessions, pass null so modal shows ALL mentors (Pay Per Session flow)
+  const filterMentorIds = upcomingMentorIds.length > 0 ? upcomingMentorIds : null;
 
   return (
     <div className="my-sessions-page">

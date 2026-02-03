@@ -3,13 +3,19 @@ import React, { useEffect, useMemo, useState } from "react";
 import "./MentorListing.css";
 import Navbar from "../../Component/Navbar/Navbar";
 import { useNavigate } from "react-router-dom";
-import { getPublicMentors } from "../../service/mentorService";
+import { getPublicMentors } from "../../service/mentorservice";
+import ScheduleSessionModal from "../../Component/ScheduleSessionModal/ScheduleSessionModal";
 
 const MentorListing = () => {
   const [mentors, setMentors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+
+  // Modal state
+  const [selectedMentorId, setSelectedMentorId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const navigate = useNavigate();
   useEffect(() => {
     const timer = setTimeout(async () => {
@@ -56,13 +62,14 @@ const MentorListing = () => {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const handleBookSession = () => {
+  const handleBookSession = (mentorId) => {
     const token = localStorage.getItem("token");
     if (!token) {
       navigate("/login");
       return;
     }
-    navigate("/pricing");
+    setSelectedMentorId(mentorId);
+    setIsModalOpen(true);
   };
 
   const visibleMentors = useMemo(() => {
@@ -178,7 +185,7 @@ const MentorListing = () => {
                     <div className="mentor-price">₹{m.price}/hr</div>
                     <button
                       className="btn btn-sm mentor-book-btn"
-                      onClick={handleBookSession}
+                      onClick={() => handleBookSession(m.id)}
                     >
                       Book Session
                     </button>
@@ -189,6 +196,17 @@ const MentorListing = () => {
           </div>
         </div>
       </section>
+
+      {/* Booking Modal */}
+      <ScheduleSessionModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        preselectedMentorId={selectedMentorId}
+        onSessionScheduled={() => {
+          setIsModalOpen(false);
+          // Optional: Refresh mentor list or show confirmation
+        }}
+      />
     </div>
   );
 };

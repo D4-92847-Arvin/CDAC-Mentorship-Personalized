@@ -41,11 +41,15 @@ namespace PaymentService.Controllers
 
             int amountInPaise = (int)(request.Amount * 100);
 
+            string receiptId = request.SessionId.HasValue 
+                ? $"student_{request.StudentId}_session_{request.SessionId}" 
+                : $"student_{request.StudentId}_plan_{request.PlanId}";
+
             var payload = new
             {
                 amount = amountInPaise,
                 currency = "INR",
-                receipt = $"student_{request.StudentId}_plan_{request.PlanId}"
+                receipt = receiptId
             };
 
             var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
@@ -73,6 +77,32 @@ namespace PaymentService.Controllers
         [HttpPost("verify")]
         public async Task<IActionResult> VerifyPayment([FromBody] PaymentVerifyRequest request)
         {
+            using var client = new HttpClient();
+
+            // 1. Session Payment Notification
+            if (request.SessionId.HasValue)
+            {
+                var sessionPayment = new
+                {
+                    sessionId = request.SessionId.Value,
+                    status = "SUCCESS",
+                    transactionId = request.RazorpayPaymentId,
+                    amount = request.Amount
+                };
+
+                var sessionJson = JsonConvert.SerializeObject(sessionPayment);
+                var sessionContent = new StringContent(sessionJson, Encoding.UTF8, "application/json");
+
+                await client.PostAsync("http://localhost:8080/api/student/payment/session-notify", sessionContent);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Session Payment processed & Spring Boot notified"
+                });
+            }
+
+            // 2. Subscription Notification (Original Logic)
             var sub = new Subscription
             {
                 StudentId = request.StudentId,
@@ -88,9 +118,6 @@ namespace PaymentService.Controllers
             _db.Subscriptions.Add(sub);
             _db.SaveChanges();
 
-            // ==============================
-            // 🔥 NOTIFY SPRING BOOT
-            // ==============================
             var springSub = new
             {
                 studentId = request.StudentId,
@@ -101,12 +128,10 @@ namespace PaymentService.Controllers
                 endDate = DateTime.Now.AddMonths(1).ToString("yyyy-MM-ddTHH:mm:ss")
             };
 
-
-            using var client = new HttpClient();
             var json = JsonConvert.SerializeObject(springSub);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            await client.PostAsync("http://localhost:8080/api/subscription/notify", content);
+            await client.PostAsync("http://localhost:8080/api/student/subscription/notify", content);
 
             return Ok(new
             {

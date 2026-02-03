@@ -11,11 +11,16 @@ import com.mentorship.entities.User;
 
 public interface UserService {
 	List<UserResp> getAllUsers();
+
 	void uploadProfileImage(Long userId, MultipartFile imageFile);
+
 	User getUserById(Long userId);
-	
+
+	UserResp getUserRespById(Long userId);
+
 	void changePassword(Long userId, ChangePasswordRequest dto);
-	
+
 	void processForgotPassword(String email);
+
 	void resetPassword(ResetPasswordRequest dto);
 }

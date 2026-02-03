@@ -61,12 +61,25 @@ const Login = () => {
       console.log("payload.email:", payload?.email);
       console.log("payload.name:", payload?.name);
       console.log("payload.userId:", payload?.userId);
+      console.log("payload.studentId:", payload?.studentId);
       console.log("payload.authorities:", authorities);
       console.log("========================");
 
+      // Clear any stale data from previous sessions
+      localStorage.removeItem("studentId");
+      localStorage.removeItem("mentorId");
+
+      // Store studentId/mentorId if present in token
+      if (payload?.studentId) {
+        localStorage.setItem("studentId", payload.studentId);
+      }
+      if (payload?.mentorId) {
+        localStorage.setItem("mentorId", payload.mentorId);
+      }
+
       // Find the role (first ROLE_* authority, ignore other authorities like FACTOR_PASSWORD)
       const userRole = authorities.find(auth => auth.startsWith("ROLE_"));
-      
+
       if (userRole) {
         // Update auth context with user data
         setAuthToken(token);
@@ -157,9 +170,9 @@ const Login = () => {
         {error && (
           <div className="login-error-container">
             <p className="text-danger">{error}</p>
-            {error.toLowerCase().includes("invalid") || 
-             error.toLowerCase().includes("password") ||
-             error.toLowerCase().includes("unauthorized") ? (
+            {error.toLowerCase().includes("invalid") ||
+              error.toLowerCase().includes("password") ||
+              error.toLowerCase().includes("unauthorized") ? (
               <button
                 type="button"
                 className="forgot-password-inline-link"
@@ -194,7 +207,7 @@ const Login = () => {
           </span>
         </div>
       </div>
-      <ForgotPasswordModal 
+      <ForgotPasswordModal
         isOpen={isForgotPasswordOpen}
         onClose={() => setIsForgotPasswordOpen(false)}
       />

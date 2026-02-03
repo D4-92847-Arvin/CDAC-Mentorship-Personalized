@@ -31,82 +31,85 @@ import lombok.AllArgsConstructor;
 @RequestMapping("/users")
 @AllArgsConstructor
 public class UserController {
-	
-	
+
 	private UserService userService;
-	
+
 	@GetMapping
-	public ResponseEntity<?> getAllUsers(){
+	public ResponseEntity<?> getAllUsers() {
 		System.out.println("in get all users");
 		List<UserResp> users = userService.getAllUsers();
-		
-		if(users.isEmpty()) {
+
+		if (users.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 		}
 		return ResponseEntity.ok(users);
 	}
-	
-	@PostMapping(
-			value="/image",
-			consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+
+	@PostMapping(value = "/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	@PreAuthorize("isAuthenticated()")
-	public ResponseEntity<?> uploadProfileImage(@RequestParam("image") MultipartFile image){
+	public ResponseEntity<?> uploadProfileImage(@RequestParam("image") MultipartFile image) {
 		Long userId = SecurityUtils.getLoggedInUserId();
-		
+
 		userService.uploadProfileImage(userId, image);
 		return ResponseEntity.ok("Profile image uploaded");
 	}
-	
+
 	@GetMapping("/image/{userId}")
 	public ResponseEntity<byte[]> getProfileImage(@PathVariable Long userId) {
 		User user = userService.getUserById(userId);
-		
+
 		if (user.getImage() == null) {
 			return ResponseEntity.notFound().build();
 		}
-		
+
 		return ResponseEntity.ok()
 				.contentType(MediaType.IMAGE_JPEG)
 				.body(user.getImage());
 	}
-	
+
 	@GetMapping("/image/me")
 	@PreAuthorize("isAuthenticated()")
 	public ResponseEntity<byte[]> getMyProfileImage() {
 		Long userId = SecurityUtils.getLoggedInUserId();
 		User user = userService.getUserById(userId);
-		
+
 		if (user.getImage() == null) {
 			return ResponseEntity.notFound().build();
 		}
-		
+
 		return ResponseEntity.ok()
 				.contentType(MediaType.IMAGE_JPEG)
 				.body(user.getImage());
 	}
-	
+
+	@GetMapping("/me")
+	@PreAuthorize("isAuthenticated()")
+	public ResponseEntity<UserResp> getMyProfileDetails() {
+		Long userId = SecurityUtils.getLoggedInUserId();
+		UserResp userResp = userService.getUserRespById(userId);
+		return ResponseEntity.ok(userResp);
+	}
+
 	@PatchMapping("/change-password")
 	@PreAuthorize("isAuthenticated()")
 	public ResponseEntity<?> changePassword(
-	        @RequestBody @Valid ChangePasswordRequest dto) {
+			@RequestBody @Valid ChangePasswordRequest dto) {
 
-	    Long userId = SecurityUtils.getLoggedInUserId();
+		Long userId = SecurityUtils.getLoggedInUserId();
 
-	    userService.changePassword(userId, dto);
+		userService.changePassword(userId, dto);
 
-	    return ResponseEntity.ok("Password changed successfully");
+		return ResponseEntity.ok("Password changed successfully");
 	}
-	
+
 	@PostMapping("/forgot-password")
 	public ResponseEntity<?> forgotPassword(
-	        @RequestBody @Valid ForgotPasswordRequest dto) {
+			@RequestBody @Valid ForgotPasswordRequest dto) {
 
-	    userService.processForgotPassword(dto.getEmail());
+		userService.processForgotPassword(dto.getEmail());
 
-	    return ResponseEntity.ok(
-	        "If the email exists, a reset link has been sent");
+		return ResponseEntity.ok(
+				"If the email exists, a reset link has been sent");
 	}
-
-	
 
 }

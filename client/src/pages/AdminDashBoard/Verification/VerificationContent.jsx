@@ -113,6 +113,7 @@ const VerificationContent = ({ onDataRefresh }) => {
                   <th>Type</th>
                   <th>Submitted</th>
                   <th>Status</th>
+                  <th>CV</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -137,6 +138,40 @@ const VerificationContent = ({ onDataRefresh }) => {
                     </td>
                     <td>
                       <span className="badge-pending">{item.status}</span>
+                    </td>
+                    <td>
+                      {item.type === "MENTOR" && (
+                        <button
+                          className="btn btn-sm btn-outline-primary"
+                          onClick={async () => {
+                            try {
+                              const token = localStorage.getItem("token");
+                              const response = await fetch(
+                                `http://localhost:8080/mentors/${item.userId}/resume`,
+                                {
+                                  headers: {
+                                    Authorization: `Bearer ${token}`,
+                                  },
+                                }
+                              );
+
+                              if (!response.ok) {
+                                throw new Error("Failed to fetch CV");
+                              }
+
+                              const blob = await response.blob();
+                              const url = window.URL.createObjectURL(blob);
+                              window.open(url, "_blank");
+                            } catch (error) {
+                              console.error("Error viewing CV:", error);
+                              alert("Failed to load CV. The mentor may not have uploaded one yet.");
+                            }
+                          }}
+                          title="View CV"
+                        >
+                          📄 CV
+                        </button>
+                      )}
                     </td>
                     <td>
                       <button

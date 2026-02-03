@@ -7,21 +7,23 @@ import MyStudents from '../MyStudents/MyStudents';
 import Feedback from '../Feedback/Feedback';
 import Earnings from '../Earnings/Earnings';
 import MentorProfile from '../MentorProfile';
+import MCQPractice from '../MCQPractice/MCQPractice';
 import "./Dashboard.css";
 
 function Dashboard() {
   return (
     <div className='dashboard-layout'>
-      <Sidebar/>
+      <Sidebar />
       <main className='main-content'>
         <Routes>
-          <Route index element={<DashboardHome/>}/>
-          <Route path='dashboard' element={<DashboardHome/>}/>
-          <Route path='availability' element={<Availability/>}/>
-          <Route path='students' element={<MyStudents/>}/>
-          <Route path='feedback' element={<Feedback/>}/>
-          <Route path='earnings' element={<Earnings/>}/>
-          <Route path='profile' element={<MentorProfile/>}/>
+          <Route index element={<DashboardHome />} />
+          <Route path='dashboard' element={<DashboardHome />} />
+          <Route path='availability' element={<Availability />} />
+          <Route path='students' element={<MyStudents />} />
+          <Route path='mcq-practice/:studentId' element={<MCQPractice />} />
+          <Route path='feedback' element={<Feedback />} />
+          <Route path='earnings' element={<Earnings />} />
+          <Route path='profile' element={<MentorProfile />} />
         </Routes>
       </main>
     </div>

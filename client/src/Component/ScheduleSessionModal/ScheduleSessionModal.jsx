@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import "../../../Component/Modal.css"; // Using a standard modal CSS
-import { bookSession, deleteSession, getVerifiedMentors } from "../../../service/studentservice";
-import { getStudentId } from "../../../service/authService";
-import { createOrder, verifyPayment } from "../../../service/paymentService";
-import { getAvailabilityForDate } from "../../../service/mentorService";
+import "../Modal.css"; // Using a standard modal CSS
+import { bookSession, deleteSession, getVerifiedMentors, getMentorDetails } from "../../service/studentservice";
+import { getStudentId } from "../../service/authService";
+import { createOrder, verifyPayment } from "../../service/paymentService";
+import { getAvailabilityForDate } from "../../service/mentorservice";
 
 const ScheduleSessionModal = ({
   isOpen,
@@ -48,8 +48,19 @@ const ScheduleSessionModal = ({
     try {
       setMentorLoading(true);
       const studentId = getStudentId();
-      const response = await getVerifiedMentors(studentId);
-      setMentors(response.data || []);
+
+      if (preselectedMentorId && preselectedMentorId !== "null") {
+        // If specific mentor selected (e.g. from public listing), fetch just that one
+        // This avoids the issue where "getVerifiedMentors" only returns *my* mentors
+        const response = await getMentorDetails(preselectedMentorId);
+        if (response.data) {
+          setMentors([response.data]);
+        }
+      } else {
+        // Otherwise load all "my" mentors (dashboard flow)
+        const response = await getVerifiedMentors(studentId);
+        setMentors(response.data || []);
+      }
       setError("");
     } catch (err) {
       console.error("Error fetching mentors:", err);
@@ -304,7 +315,7 @@ const ScheduleSessionModal = ({
       console.error("Error scheduling session:", err);
       setError(
         err.response?.data?.message ||
-          "Failed to schedule session. Please try again.",
+        "Failed to schedule session. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -466,14 +477,14 @@ const ScheduleSessionModal = ({
                 {loading
                   ? "Processing..."
                   : (() => {
-                      const selectedMentor = mentors.find(
-                        (m) => m.mentorId == formData.mentorId,
-                      );
-                      const fee = selectedMentor?.ratePerSession || 0;
-                      return fee > 0
-                        ? `Pay ₹${fee} & Schedule`
-                        : "Schedule Session";
-                    })()}
+                    const selectedMentor = mentors.find(
+                      (m) => m.mentorId == formData.mentorId,
+                    );
+                    const fee = selectedMentor?.ratePerSession || 0;
+                    return fee > 0
+                      ? `Pay ₹${fee} & Schedule`
+                      : "Schedule Session";
+                  })()}
               </button>
             </div>
           </form>

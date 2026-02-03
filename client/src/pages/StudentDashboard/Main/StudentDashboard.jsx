@@ -8,6 +8,7 @@ import Subscriptions from "../Subscriptions/Subscriptions";
 import Feedback from "../Feedback/Feedback";
 import EditProfileModal from "./EditProfileModal";
 import StudentProfile from "../StudentProfile";
+import StudyTimer from "../StudyTimer/StudyTimer"; // Import StudyTimer
 import { getStudentDashboard } from "../../../service/studentservice";
 import { getStudentId, clearStudentAuth } from "../../../service/authService";
 import { useDarkMode } from "../../../context/DarkModeContext";
@@ -18,6 +19,7 @@ const sidebarItems = [
   { label: "My Mentor", icon: "👩‍🏫" },
   { label: "My Sessions", icon: "📅" },
   { label: "MCQ Practice", icon: "📝" },
+  { label: "Study Timer", icon: "⏱️" }, // Add Sidebar Item
   { label: "Subscriptions", icon: "💳" },
   { label: "Feedback", icon: "💬" },
 ];
@@ -56,7 +58,7 @@ const StudentDashboard = () => {
       console.error("Dashboard Error:", err);
       setError(
         err.response?.data?.message ||
-          "Failed to load dashboard. Please refresh."
+        "Failed to load dashboard. Please refresh."
       );
     } finally {
       setLoading(false);
@@ -124,13 +126,6 @@ const StudentDashboard = () => {
 
         {/* Logout */}
         <div className="sidebar-logout">
-          <button 
-            className="btn btn-dark-mode-toggle"
-            onClick={toggleDarkMode}
-            title={isDarkMode ? "Light Mode" : "Dark Mode"}
-          >
-            {isDarkMode ? "☀️" : "🌙"}
-          </button>
           <button className="btn btn-light w-100" onClick={handleLogout}>
             Logout
           </button>
@@ -154,7 +149,7 @@ const StudentDashboard = () => {
                 <h1>Student Dashboard</h1>
                 <p>Your session analytics</p>
               </div>
-              <button 
+              <button
                 className="edit-profile-btn"
                 onClick={() => setIsEditModalOpen(true)}
               >
@@ -206,6 +201,7 @@ const StudentDashboard = () => {
         {activeTab === "MCQ Practice" && (
           <MCQPractice onBackToDashboard={() => setActiveTab("Dashboard")} />
         )}
+        {activeTab === "Study Timer" && <StudyTimer />}
         {activeTab === "Subscriptions" && (
           <Subscriptions onBackToDashboard={() => setActiveTab("Dashboard")} />
         )}

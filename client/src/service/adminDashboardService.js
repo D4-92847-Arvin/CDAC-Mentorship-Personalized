@@ -74,9 +74,7 @@ export const adminDashboardService = {
 
   deleteUser: async (userId) => {
     try {
-      const response = await api.delete(
-        `${ADMIN_DASHBOARD_API}/users/${userId}`,
-      );
+      const response = await api.delete(`${ADMIN_DASHBOARD_API}/users/${userId}`);
       return response.data;
     } catch (error) {
       console.error("Error deleting user:", error);

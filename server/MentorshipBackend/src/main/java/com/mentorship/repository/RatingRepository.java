@@ -12,7 +12,7 @@ import com.mentorship.entities.Rating;
 @Repository
 public interface RatingRepository extends JpaRepository<Rating, Long> {
     List<Rating> findByMentorAndIsActiveTrue(Mentor mentor);
-    
+
     @Query("SELECT AVG(r.ratingValue) FROM Rating r WHERE r.mentor.mentorId = :mentorId AND r.isActive = true")
-    double getAverageRatingByMentorId(Long mentorId);
+    Double getAverageRatingByMentorId(Long mentorId);
 }

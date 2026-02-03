@@ -83,26 +83,28 @@ export const updateStudentProfile = (studentId, profileData) => {
   return api.put(`/api/student/${studentId}`, profileData);
 };
 
-// Delete a session
-export const deleteSession = (sessionId) => {
-  return api.delete(`/api/student/sessions/${sessionId}`);
-};
+
 
 // Study Timer functions
+// Study Timer functions
 export const startStudySession = (studentId, taskName) => {
-  return api.post(`/api/student/${studentId}/study-timer/start`, { taskName });
+  // Backend expects RequestParam, not body
+  return api.post(`/api/student/${studentId}/study/start?taskName=${encodeURIComponent(taskName)}`);
 };
 
 export const stopStudySession = (sessionId) => {
-  return api.post(`/api/student/study-timer/${sessionId}/stop`);
+  // Backend: /study/stop/{sessionId}
+  return api.post(`/api/student/study/stop/${sessionId}`);
 };
 
 export const getStudyHistory = (studentId) => {
-  return api.get(`/api/student/${studentId}/study-timer/history`);
+  // Backend: /{studentId}/study/history
+  return api.get(`/api/student/${studentId}/study/history`);
 };
 
 export const deleteStudySession = (sessionId) => {
-  return api.delete(`/api/student/study-timer/${sessionId}`);
+  // Backend: /study/{sessionId}
+  return api.delete(`/api/student/study/${sessionId}`);
 };
 
 // Chat functions for students
@@ -123,6 +125,4 @@ export const getStudentConversations = (studentId) => {
 };
 
 // Subscription function
-export const getActiveSubscription = (studentId) => {
-  return api.get(`/api/student/${studentId}/subscription/active`);
-};
+

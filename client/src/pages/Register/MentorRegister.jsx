@@ -17,6 +17,10 @@ const MentorRegister = () => {
     experience: "",
     ratePerSession: "",
     discountPercent: "",
+    highestEducation: "",
+    currentPosition: "",
+    organization: "",
+    professionalBio: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -38,8 +42,14 @@ const MentorRegister = () => {
 
     try {
       // Validate required fields
-      if (!form.firstName || !form.email || !form.password || !form.specialization || !form.experience || !form.ratePerSession) {
+      if (!form.firstName || !form.email || !form.password || !form.specialization || !form.experience || !form.ratePerSession || !form.highestEducation || !form.currentPosition || !form.organization || !form.professionalBio) {
         setError("Please fill in all required fields");
+        setLoading(false);
+        return;
+      }
+
+      if (form.professionalBio.length < 50) {
+        setError("Professional Bio must be at least 50 characters long");
         setLoading(false);
         return;
       }
@@ -72,10 +82,14 @@ const MentorRegister = () => {
         experience: form.experience,
         ratePerSession: rate,
         discountPercent: form.discountPercent ? parseFloat(form.discountPercent) : 0,
+        highestEducation: form.highestEducation,
+        currentPosition: form.currentPosition,
+        organization: form.organization,
+        professionalBio: form.professionalBio,
       };
 
       await registerMentor(signupData);
-      
+
       alert("Mentor application submitted successfully! Your account is pending admin verification.");
       navigate("/login");
     } catch (err) {
@@ -301,6 +315,59 @@ const MentorRegister = () => {
                 max="100"
                 step="0.01"
               />
+            </div>
+          </div>
+
+          {/* Additional Professional Details */}
+          <div className="row g-3 mt-1">
+            <div className="col-md-6">
+              <label className="form-label">Highest Education *</label>
+              <input
+                name="highestEducation"
+                type="text"
+                className="form-control register-input"
+                placeholder="e.g., M.Tech, PhD"
+                value={form.highestEducation}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label">Current Position *</label>
+              <input
+                name="currentPosition"
+                type="text"
+                className="form-control register-input"
+                placeholder="e.g., Senior Engineer"
+                value={form.currentPosition}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="col-md-12">
+              <label className="form-label">Organization *</label>
+              <input
+                name="organization"
+                type="text"
+                className="form-control register-input"
+                placeholder="e.g., Google, Amazon, Self-Employed"
+                value={form.organization}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="col-md-12">
+              <label className="form-label">Professional Bio (min 50 chars) *</label>
+              <textarea
+                name="professionalBio"
+                className="form-control register-input"
+                placeholder="Tell us about your professional journey..."
+                value={form.professionalBio}
+                onChange={handleChange}
+                rows="3"
+                minLength="50"
+                required
+              ></textarea>
             </div>
           </div>
 

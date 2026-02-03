@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./BrowseMentors.css";
 import { getVerifiedMentors } from "../../../service/studentservice";
 import { getStudentId } from "../../../service/authService";
-import ScheduleSessionModal from "../MySessions/ScheduleSessionModal";
+import ScheduleSessionModal from "../../../Component/ScheduleSessionModal/ScheduleSessionModal";
 import { useNavigate } from "react-router-dom";
 
 const BrowseMentors = ({ onBack, onNavigateToSubscriptions }) => {
